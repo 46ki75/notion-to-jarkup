@@ -1,3 +1,3 @@
 locals {
-  repository = "template-devcontainer"
+  repository = "notion-to-jarkup"
 }
