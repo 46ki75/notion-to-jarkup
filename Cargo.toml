@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+jarkup-rs = "0.1.0"
+notionrs = "1.0.0-alpha.40"
+reqwest = { version = "0.12.15", default-features = false, features = [
+    "rustls-tls",
+] }
+scraper = "0.23.1"
+thiserror = "2.0.12"
+url = "2.5.4"
