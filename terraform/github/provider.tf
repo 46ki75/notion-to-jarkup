@@ -5,4 +5,13 @@ terraform {
       version = "~> 6.0"
     }
   }
+
+  cloud {
+    organization = "46ki75"
+    hostname     = "app.terraform.io"
+
+    workspaces {
+      name = "notion-to-jarkup"
+    }
+  }
 }
