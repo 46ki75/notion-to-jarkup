@@ -1,12 +1,5 @@
-# notion-to-jarkup
-
-Convert Notion blocks into [jarkup](https://github.com/46ki75/jarkup) JSON.
-
-## Example
-
-```rust
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::test]
+async fn convert() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
     let notion_api_key = std::env::var("NOTION_API_KEY")?;
     let block_id = std::env::var("BLOCK_ID")?;
@@ -25,4 +18,3 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-```
