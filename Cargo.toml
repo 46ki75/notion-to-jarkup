@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+async-recursion = "1.1.1"
 html-meta-scraper = "0.1.0"
 jarkup-rs = "0.1.0"
 notionrs = "1.0.0-alpha.40"
