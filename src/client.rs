@@ -449,10 +449,13 @@ impl Client {
                 notionrs::object::block::Block::Table { table } => {
                     let mut all_children_rows = self.convert_block(&block.id).await?;
 
-                    let maybe_header_row = if table.has_row_header && all_children_rows.len() > 0 {
-                        let first = all_children_rows.remove(0);
-                        let maybe_row_components =
-                            if let jarkup_rs::Component::BlockComponent(block_component) = first {
+                    let maybe_header_row =
+                        if table.has_column_header && all_children_rows.len() > 0 {
+                            let first = all_children_rows.remove(0);
+                            let maybe_row_components = if let jarkup_rs::Component::BlockComponent(
+                                block_component,
+                            ) = first
+                            {
                                 if let jarkup_rs::BlockComponent::TableRow(table_row) =
                                     block_component
                                 {
@@ -464,12 +467,12 @@ impl Client {
                                 None
                             };
 
-                        Some(maybe_row_components)
-                    } else {
-                        None
-                    }
-                    .flatten()
-                    .map(|table_row| vec![table_row]);
+                            Some(maybe_row_components)
+                        } else {
+                            None
+                        }
+                        .flatten()
+                        .map(|table_row| vec![table_row]);
 
                     let body_rows = all_children_rows
                         .into_iter()
@@ -508,6 +511,8 @@ impl Client {
                     components.push(component.into());
                 }
                 notionrs::object::block::Block::TableRow { table_row } => {
+                    let mut cell_components: Vec<jarkup_rs::Component> = Vec::new();
+
                     for cell in table_row.cells {
                         let children_inline_componense = self.convert_rich_text(cell).await?;
 
@@ -518,8 +523,17 @@ impl Client {
                             },
                         };
 
-                        components.push(component.into());
+                        cell_components.push(component.into());
                     }
+
+                    let row_component = jarkup_rs::TableRow {
+                        props: None,
+                        slots: jarkup_rs::TableRowSlots {
+                            default: cell_components,
+                        },
+                    };
+
+                    components.push(row_component.into());
                 }
                 notionrs::object::block::Block::Template { template: _ } => {
                     if self.enable_unsupported_block {
