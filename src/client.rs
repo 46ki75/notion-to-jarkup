@@ -9,10 +9,10 @@ pub struct Client {
 }
 
 impl Client {
-    fn create_unsupported_component(&self, bloack_name: &str) -> jarkup_rs::Component {
+    fn create_unsupported_component(&self, block_name: &str) -> jarkup_rs::Component {
         jarkup_rs::Unsupported {
             props: Some(jarkup_rs::UnsupportedProps {
-                details: format!("Notion: `{} Block` is not supported.", bloack_name),
+                details: format!("Notion: `{} Block` is not supported.", block_name),
             }),
             slots: None,
         }
