@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct Client {
-    notionrs_client: notionrs::client::Client,
-    reqwest_client: reqwest::Client,
+    pub notionrs_client: notionrs::client::Client,
+    pub reqwest_client: reqwest::Client,
 }
 
 impl Client {
@@ -192,7 +192,7 @@ impl Client {
                             language: code.language.to_string(),
                         },
                         slots: jarkup_rs::CodeBlockSlots {
-                            default: self.convert_rich_text(code.rich_text).await?,
+                            default: self.convert_rich_text(code.caption).await?,
                         },
                     };
 
@@ -512,7 +512,7 @@ impl Client {
             }
         }
 
-        todo!()
+        Ok(components)
     }
 
     pub async fn convert_rich_text(
