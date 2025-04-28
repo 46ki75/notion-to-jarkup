@@ -2,9 +2,23 @@
 pub struct Client {
     pub notionrs_client: notionrs::client::Client,
     pub reqwest_client: reqwest::Client,
+
+    /// If true, unsupported blocks will be rendered as `Unsupported` blocks.
+    /// If false, unsupported blocks will be skipped.
+    pub enable_unsupported_block: bool,
 }
 
 impl Client {
+    fn create_unsupported_component(&self, block_name: &str) -> jarkup_rs::Component {
+        jarkup_rs::Unsupported {
+            props: Some(jarkup_rs::UnsupportedProps {
+                details: format!("Notion: `{} Block` is not supported.", block_name),
+            }),
+            slots: None,
+        }
+        .into()
+    }
+
     #[async_recursion::async_recursion]
     pub async fn convert_block(
         &self,
@@ -21,7 +35,13 @@ impl Client {
 
         for block in blocks {
             match block.block {
-                notionrs::object::block::Block::Audio { audio: _ } => continue,
+                notionrs::object::block::Block::Audio { audio: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Audio"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Bookmark { bookmark } => {
                     let html = self
                         .reqwest_client
@@ -38,7 +58,6 @@ impl Client {
                     let image = meta_scraper.image();
 
                     let component = jarkup_rs::Bookmark {
-                        inline: false,
                         props: jarkup_rs::BookmarkProps {
                             url: bookmark.url,
                             title,
@@ -50,10 +69,15 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Breadcrumb { breadcrumb: _ } => continue,
+                notionrs::object::block::Block::Breadcrumb { breadcrumb: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Breadcrumb"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::BulletedListItem { bulleted_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
                             default: self.convert_rich_text(bulleted_list_item.rich_text).await?,
@@ -94,7 +118,6 @@ impl Client {
                     };
 
                     let component = jarkup_rs::List {
-                        inline: false,
                         props: Some(jarkup_rs::ListProps {
                             list_style: Some(jarkup_rs::ListStyle::Unordered),
                         }),
@@ -110,7 +133,6 @@ impl Client {
                         if callout.rich_text.len() > 0 {
                             Some(
                                 jarkup_rs::Paragraph {
-                                    inline: false,
                                     props: None,
                                     slots: jarkup_rs::ParagraphSlots {
                                         default: self.convert_rich_text(callout.rich_text).await?,
@@ -134,7 +156,6 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::Callout {
-                        inline: false,
                         props: Some(jarkup_rs::CalloutProps {
                             r#type: Some(match callout.color {
                                 notionrs::object::color::Color::Default
@@ -176,11 +197,22 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::ChildDatabase { child_database: _ } => continue,
-                notionrs::object::block::Block::ChildPage { child_page: _ } => continue,
+                notionrs::object::block::Block::ChildDatabase { child_database: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("ChildDatabase"));
+                    } else {
+                        continue;
+                    }
+                }
+                notionrs::object::block::Block::ChildPage { child_page: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("ChildPage"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Code { code } => {
                     let component = jarkup_rs::CodeBlock {
-                        inline: false,
                         props: jarkup_rs::CodeBlockProps {
                             code: code
                                 .rich_text
@@ -191,9 +223,9 @@ impl Client {
                                 .join(""),
                             language: code.language.to_string(),
                         },
-                        slots: jarkup_rs::CodeBlockSlots {
+                        slots: Some(jarkup_rs::CodeBlockSlots {
                             default: self.convert_rich_text(code.caption).await?,
-                        },
+                        }),
                     };
 
                     components.push(component.into());
@@ -202,17 +234,21 @@ impl Client {
                 notionrs::object::block::Block::Column { column: _ } => continue,
                 notionrs::object::block::Block::Divider { divider: _ } => {
                     let component = jarkup_rs::Divider {
-                        inline: false,
                         props: None,
                         slots: None,
                     };
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Embed { embed: _ } => continue,
+                notionrs::object::block::Block::Embed { embed: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Embed"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Equation { equation } => {
                     let component = jarkup_rs::Katex {
-                        inline: false,
                         props: jarkup_rs::KatexProps {
                             expression: equation.expression,
                         },
@@ -223,7 +259,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::File { file } => {
                     let component = jarkup_rs::File {
-                        inline: false,
                         props: jarkup_rs::FileProps {
                             src: file.get_url(),
                             name: match file {
@@ -242,7 +277,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Heading1 { heading_1 } => {
                     let component = jarkup_rs::Heading {
-                        inline: false,
                         props: jarkup_rs::HeadingProps {
                             level: jarkup_rs::HeadingLevel::H1,
                         },
@@ -255,7 +289,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Heading2 { heading_2 } => {
                     let component = jarkup_rs::Heading {
-                        inline: false,
                         props: jarkup_rs::HeadingProps {
                             level: jarkup_rs::HeadingLevel::H2,
                         },
@@ -268,7 +301,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Heading3 { heading_3 } => {
                     let component = jarkup_rs::Heading {
-                        inline: false,
                         props: jarkup_rs::HeadingProps {
                             level: jarkup_rs::HeadingLevel::H3,
                         },
@@ -291,7 +323,6 @@ impl Client {
                     .map(|c| c.into_iter().map(|r| r.to_string()).collect::<String>());
 
                     let component = jarkup_rs::Image {
-                        inline: false,
                         props: jarkup_rs::ImageProps {
                             src: image.get_url(),
                             alt: maybe_caption,
@@ -301,10 +332,15 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::LinkPreview { link_preview: _ } => continue,
+                notionrs::object::block::Block::LinkPreview { link_preview: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("LinkPreview"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::NumberedListItem { numbered_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
                             default: self.convert_rich_text(numbered_list_item.rich_text).await?,
@@ -345,7 +381,6 @@ impl Client {
                     };
 
                     let component = jarkup_rs::List {
-                        inline: false,
                         props: Some(jarkup_rs::ListProps {
                             list_style: Some(jarkup_rs::ListStyle::Ordered),
                         }),
@@ -358,7 +393,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ParagraphSlots {
                             default: self.convert_rich_text(paragraph.rich_text).await?,
@@ -372,7 +406,6 @@ impl Client {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if quote.rich_text.len() > 0 {
                             let paragraph = jarkup_rs::Paragraph {
-                                inline: false,
                                 props: None,
                                 slots: jarkup_rs::ParagraphSlots {
                                     default: self.convert_rich_text(quote.rich_text).await?,
@@ -395,7 +428,6 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::BlockQuote {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::BlockQuoteSlots {
                             default: merged_components,
@@ -404,17 +436,26 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::SyncedBlock { synced_block: _ } => continue,
+                notionrs::object::block::Block::SyncedBlock { synced_block: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("SyncedBlock"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::TableOfContents {
                     table_of_contents: _,
                 } => continue,
                 notionrs::object::block::Block::Table { table } => {
                     let mut all_children_rows = self.convert_block(&block.id).await?;
 
-                    let maybe_header_row = if table.has_row_header && all_children_rows.len() > 0 {
-                        let first = all_children_rows.remove(0);
-                        let maybe_row_components =
-                            if let jarkup_rs::Component::BlockComponent(block_component) = first {
+                    let maybe_header_row =
+                        if table.has_column_header && all_children_rows.len() > 0 {
+                            let first = all_children_rows.remove(0);
+                            let maybe_row_components = if let jarkup_rs::Component::BlockComponent(
+                                block_component,
+                            ) = first
+                            {
                                 if let jarkup_rs::BlockComponent::TableRow(table_row) =
                                     block_component
                                 {
@@ -426,12 +467,12 @@ impl Client {
                                 None
                             };
 
-                        Some(maybe_row_components)
-                    } else {
-                        None
-                    }
-                    .flatten()
-                    .map(|table_row| vec![table_row]);
+                            Some(maybe_row_components)
+                        } else {
+                            None
+                        }
+                        .flatten()
+                        .map(|table_row| vec![table_row]);
 
                     let body_rows = all_children_rows
                         .into_iter()
@@ -456,7 +497,6 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::Table {
-                        inline: false,
                         props: Some(jarkup_rs::TableProps {
                             has_column_header: Some(table.has_column_header),
                             has_row_header: Some(table.has_row_header),
@@ -471,22 +511,44 @@ impl Client {
                     components.push(component.into());
                 }
                 notionrs::object::block::Block::TableRow { table_row } => {
+                    let mut cell_components: Vec<jarkup_rs::Component> = Vec::new();
+
                     for cell in table_row.cells {
                         let children_inline_componense = self.convert_rich_text(cell).await?;
 
                         let component = jarkup_rs::TableCell {
-                            inline: false,
                             props: None,
                             slots: jarkup_rs::TableCellSlots {
                                 default: children_inline_componense,
                             },
                         };
 
-                        components.push(component.into());
+                        cell_components.push(component.into());
+                    }
+
+                    let row_component = jarkup_rs::TableRow {
+                        props: None,
+                        slots: jarkup_rs::TableRowSlots {
+                            default: cell_components,
+                        },
+                    };
+
+                    components.push(row_component.into());
+                }
+                notionrs::object::block::Block::Template { template: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Template"));
+                    } else {
+                        continue;
                     }
                 }
-                notionrs::object::block::Block::Template { template: _ } => continue,
-                notionrs::object::block::Block::ToDo { to_do: _ } => continue,
+                notionrs::object::block::Block::ToDo { to_do: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("ToDo"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Toggle { toggle } => {
                     let children_components = if block.has_children {
                         self.convert_block(&block.id).await?
@@ -497,7 +559,6 @@ impl Client {
                     let summary_components = self.convert_rich_text(toggle.rich_text).await?;
 
                     let component = jarkup_rs::Toggle {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ToggleSlots {
                             default: children_components,
@@ -507,8 +568,20 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Video { video: _ } => continue,
-                notionrs::object::block::Block::Unsupported => continue,
+                notionrs::object::block::Block::Video { video: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Video"));
+                    } else {
+                        continue;
+                    }
+                }
+                notionrs::object::block::Block::Unsupported => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Unsupported"));
+                    } else {
+                        continue;
+                    }
+                }
             }
         }
 
@@ -531,7 +604,6 @@ impl Client {
                     href: _,
                 } => {
                     let component = jarkup_rs::Text {
-                        inline: true,
                         props: jarkup_rs::TextProps {
                             text: plain_text,
                             color: match annotations.color {
@@ -638,7 +710,6 @@ impl Client {
                                 link_mention,
                             } => {
                                 let component = jarkup_rs::Text {
-                                    inline: true,
                                     props: jarkup_rs::TextProps {
                                         text: plain_text,
                                         favicon: self
@@ -671,7 +742,6 @@ impl Client {
                                 custom_emoji,
                             } => {
                                 let component = jarkup_rs::Icon {
-                                    inline: true,
                                     props: jarkup_rs::IconProps {
                                         src: custom_emoji.url,
                                         alt: Some(custom_emoji.name),
@@ -694,7 +764,6 @@ impl Client {
                     href: _href,
                 } => {
                     let component = jarkup_rs::Text {
-                        inline: true,
                         props: jarkup_rs::TextProps {
                             text: equation.expression,
                             katex: Some(true),
