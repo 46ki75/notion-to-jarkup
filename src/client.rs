@@ -2,9 +2,23 @@
 pub struct Client {
     pub notionrs_client: notionrs::client::Client,
     pub reqwest_client: reqwest::Client,
+
+    /// If true, unsupported blocks will be rendered as `Unsupported` blocks.
+    /// If false, unsupported blocks will be skipped.
+    pub enable_unsupported_block: bool,
 }
 
 impl Client {
+    fn create_unsupported_component(&self, bloack_name: &str) -> jarkup_rs::Component {
+        jarkup_rs::Unsupported {
+            props: Some(jarkup_rs::UnsupportedProps {
+                details: format!("Notion: `{} Block` is not supported.", bloack_name),
+            }),
+            slots: None,
+        }
+        .into()
+    }
+
     #[async_recursion::async_recursion]
     pub async fn convert_block(
         &self,
@@ -21,7 +35,13 @@ impl Client {
 
         for block in blocks {
             match block.block {
-                notionrs::object::block::Block::Audio { audio: _ } => continue,
+                notionrs::object::block::Block::Audio { audio: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Audio"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Bookmark { bookmark } => {
                     let html = self
                         .reqwest_client
@@ -49,7 +69,13 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Breadcrumb { breadcrumb: _ } => continue,
+                notionrs::object::block::Block::Breadcrumb { breadcrumb: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Breadcrumb"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::BulletedListItem { bulleted_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
                         props: None,
@@ -171,8 +197,20 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::ChildDatabase { child_database: _ } => continue,
-                notionrs::object::block::Block::ChildPage { child_page: _ } => continue,
+                notionrs::object::block::Block::ChildDatabase { child_database: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("ChildDatabase"));
+                    } else {
+                        continue;
+                    }
+                }
+                notionrs::object::block::Block::ChildPage { child_page: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("ChildPage"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Code { code } => {
                     let component = jarkup_rs::CodeBlock {
                         props: jarkup_rs::CodeBlockProps {
@@ -202,7 +240,13 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Embed { embed: _ } => continue,
+                notionrs::object::block::Block::Embed { embed: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Embed"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Equation { equation } => {
                     let component = jarkup_rs::Katex {
                         props: jarkup_rs::KatexProps {
@@ -288,7 +332,13 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::LinkPreview { link_preview: _ } => continue,
+                notionrs::object::block::Block::LinkPreview { link_preview: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("LinkPreview"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::NumberedListItem { numbered_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
                         props: None,
@@ -386,7 +436,13 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::SyncedBlock { synced_block: _ } => continue,
+                notionrs::object::block::Block::SyncedBlock { synced_block: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("SyncedBlock"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::TableOfContents {
                     table_of_contents: _,
                 } => continue,
@@ -465,8 +521,20 @@ impl Client {
                         components.push(component.into());
                     }
                 }
-                notionrs::object::block::Block::Template { template: _ } => continue,
-                notionrs::object::block::Block::ToDo { to_do: _ } => continue,
+                notionrs::object::block::Block::Template { template: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Template"));
+                    } else {
+                        continue;
+                    }
+                }
+                notionrs::object::block::Block::ToDo { to_do: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("ToDo"));
+                    } else {
+                        continue;
+                    }
+                }
                 notionrs::object::block::Block::Toggle { toggle } => {
                     let children_components = if block.has_children {
                         self.convert_block(&block.id).await?
@@ -486,8 +554,20 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Video { video: _ } => continue,
-                notionrs::object::block::Block::Unsupported => continue,
+                notionrs::object::block::Block::Video { video: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Video"));
+                    } else {
+                        continue;
+                    }
+                }
+                notionrs::object::block::Block::Unsupported => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Unsupported"));
+                    } else {
+                        continue;
+                    }
+                }
             }
         }
 

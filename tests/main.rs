@@ -10,6 +10,7 @@ async fn convert() -> Result<(), Box<dyn std::error::Error>> {
     let client = notion_to_jarkup::client::Client {
         notionrs_client,
         reqwest_client,
+        enable_unsupported_block: true,
     };
 
     let result = client.convert_block(&block_id).await?;
