@@ -4,7 +4,7 @@ pub enum Error {
     NotionRs(#[from] notionrs::error::Error),
 
     #[error("reqwest error: {0}")]
-    Reqewst(#[from] reqwest::Error),
+    Reqwest(#[from] reqwest::Error),
 
     #[error("scraper error: {0}")]
     Scraper(#[from] scraper::error::SelectorErrorKind<'static>),
