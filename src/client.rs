@@ -5,15 +5,7 @@ use jarkup_rs::InlineComponent;
 #[derive(Debug)]
 pub struct Client {
     notionrs_client: notionrs::client::Client,
-}
-
-#[derive(Debug, Default)]
-pub struct PageMeta {
-    url: String,
-    title: Option<String>,
-    description: Option<String>,
-    image: Option<String>,
-    favicon: Option<String>,
+    reqwest_client: reqwest::Client,
 }
 
 impl Client {
@@ -154,10 +146,15 @@ impl Client {
                         ruby: None,
                         href: text.link.clone().map(|l| l.url),
                         favicon: if let Some(l) = text.link {
-                            self.fetch_page_meta(&l.url)
-                                .await
-                                .ok()
-                                .and_then(|p| p.favicon)
+                            let res = self.reqwest_client.get(l.url).send().await?;
+
+                            let html = res.text().await?;
+
+                            let meta_scraper = html_meta_scraper::MetaScraper::new(&html);
+
+                            let favicon = meta_scraper.favicon();
+
+                            favicon
                         } else {
                             None
                         },
@@ -192,88 +189,5 @@ impl Client {
                 Ok(component.into())
             }
         }
-    }
-
-    async fn fetch_page_meta(&self, href: &str) -> Result<PageMeta, crate::error::Error> {
-        let mut page_meta = PageMeta::default();
-
-        let response = reqwest::Client::new()
-            .get(href)
-            .header("user-agent", "Rust - reqwest")
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        let document = scraper::Html::parse_document(&response);
-
-        // title
-
-        let title = document
-            .select(&scraper::Selector::parse("title")?)
-            .next()
-            .map(|element| element.text().collect::<String>());
-
-        let og_title_selector = scraper::Selector::parse("meta[property='og:title']")?;
-
-        if let Some(element) = document.select(&og_title_selector).next() {
-            if let Some(content) = element.value().attr("content") {
-                page_meta.title = Some(content.to_string());
-            }
-        }
-
-        if let Some(title) = title {
-            page_meta.title = Some(title);
-        }
-
-        // description
-
-        let description = document
-            .select(&scraper::Selector::parse("meta[name='description']")?)
-            .next()
-            .map(|element| element.value().attr("content").unwrap().to_string());
-
-        if let Some(description) = description {
-            page_meta.description = Some(description);
-        }
-
-        let og_description_selector = scraper::Selector::parse("meta[property='og:description']")?;
-
-        if let Some(element) = document.select(&og_description_selector).next() {
-            if let Some(content) = element.value().attr("content") {
-                page_meta.description = Some(content.to_string());
-            }
-        }
-
-        // image
-
-        let og_image_selector = scraper::Selector::parse("meta[property='og:image']")?;
-
-        if let Some(element) = document.select(&og_image_selector).next() {
-            if let Some(content) = element.value().attr("content") {
-                page_meta.image = Some(content.to_string());
-            }
-        };
-
-        // favicon
-
-        let favicon_selector = scraper::Selector::parse(r#"link[rel="icon"]"#)?;
-
-        page_meta.favicon = document
-            .select(&favicon_selector)
-            .next()
-            .and_then(|f| f.value().attr("href").map(String::from))
-            .and_then(|favicon_href| {
-                if favicon_href.starts_with("http://") || favicon_href.starts_with("https://") {
-                    Some(favicon_href)
-                } else {
-                    url::Url::parse(&href)
-                        .and_then(|s| s.join(&favicon_href))
-                        .map(|s| s.to_string())
-                        .ok()
-                }
-            });
-
-        Ok(page_meta)
     }
 }

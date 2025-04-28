@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+html-meta-scraper = "0.1.0"
 jarkup-rs = "0.1.0"
 notionrs = "1.0.0-alpha.40"
 reqwest = { version = "0.12.15", default-features = false, features = [
