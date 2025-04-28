@@ -60,7 +60,7 @@ impl Client {
                         },
                     };
 
-                    let maybe_prev_component = components.first_mut().and_then(|c| match c {
+                    let maybe_prev_component = components.last_mut().and_then(|c| match c {
                         jarkup_rs::Component::InlineComponent(_) => None,
                         jarkup_rs::Component::BlockComponent(block_component) => {
                             match block_component {
@@ -99,7 +99,7 @@ impl Client {
                             list_style: Some(jarkup_rs::ListStyle::Unordered),
                         }),
                         slots: jarkup_rs::ListSlots {
-                            default: vec![list_item_component],
+                            default: vec![list_item_component.into()],
                         },
                     };
 
@@ -311,7 +311,7 @@ impl Client {
                         },
                     };
 
-                    let maybe_prev_component = components.first_mut().and_then(|c| match c {
+                    let maybe_prev_component = components.last_mut().and_then(|c| match c {
                         jarkup_rs::Component::InlineComponent(_) => None,
                         jarkup_rs::Component::BlockComponent(block_component) => {
                             match block_component {
@@ -350,7 +350,7 @@ impl Client {
                             list_style: Some(jarkup_rs::ListStyle::Ordered),
                         }),
                         slots: jarkup_rs::ListSlots {
-                            default: vec![list_item_component],
+                            default: vec![list_item_component.into()],
                         },
                     };
 
@@ -418,7 +418,7 @@ impl Client {
                                 if let jarkup_rs::BlockComponent::TableRow(table_row) =
                                     block_component
                                 {
-                                    Some(table_row.to_owned())
+                                    Some(table_row.to_owned().into())
                                 } else {
                                     None
                                 }
@@ -443,7 +443,7 @@ impl Client {
                                 if let jarkup_rs::BlockComponent::TableRow(table_row) =
                                     block_component
                                 {
-                                    Some(table_row.to_owned())
+                                    Some(table_row.to_owned().into())
                                 } else {
                                     None
                                 }
@@ -453,7 +453,7 @@ impl Client {
 
                             maybe_row_component
                         })
-                        .collect::<Vec<jarkup_rs::TableRow>>();
+                        .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::Table {
                         inline: false,
