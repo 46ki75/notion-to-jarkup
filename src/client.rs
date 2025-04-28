@@ -38,7 +38,6 @@ impl Client {
                     let image = meta_scraper.image();
 
                     let component = jarkup_rs::Bookmark {
-                        inline: false,
                         props: jarkup_rs::BookmarkProps {
                             url: bookmark.url,
                             title,
@@ -53,7 +52,6 @@ impl Client {
                 notionrs::object::block::Block::Breadcrumb { breadcrumb: _ } => continue,
                 notionrs::object::block::Block::BulletedListItem { bulleted_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
                             default: self.convert_rich_text(bulleted_list_item.rich_text).await?,
@@ -94,7 +92,6 @@ impl Client {
                     };
 
                     let component = jarkup_rs::List {
-                        inline: false,
                         props: Some(jarkup_rs::ListProps {
                             list_style: Some(jarkup_rs::ListStyle::Unordered),
                         }),
@@ -110,7 +107,6 @@ impl Client {
                         if callout.rich_text.len() > 0 {
                             Some(
                                 jarkup_rs::Paragraph {
-                                    inline: false,
                                     props: None,
                                     slots: jarkup_rs::ParagraphSlots {
                                         default: self.convert_rich_text(callout.rich_text).await?,
@@ -134,7 +130,6 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::Callout {
-                        inline: false,
                         props: Some(jarkup_rs::CalloutProps {
                             r#type: Some(match callout.color {
                                 notionrs::object::color::Color::Default
@@ -180,7 +175,6 @@ impl Client {
                 notionrs::object::block::Block::ChildPage { child_page: _ } => continue,
                 notionrs::object::block::Block::Code { code } => {
                     let component = jarkup_rs::CodeBlock {
-                        inline: false,
                         props: jarkup_rs::CodeBlockProps {
                             code: code
                                 .rich_text
@@ -191,9 +185,9 @@ impl Client {
                                 .join(""),
                             language: code.language.to_string(),
                         },
-                        slots: jarkup_rs::CodeBlockSlots {
+                        slots: Some(jarkup_rs::CodeBlockSlots {
                             default: self.convert_rich_text(code.caption).await?,
-                        },
+                        }),
                     };
 
                     components.push(component.into());
@@ -202,7 +196,6 @@ impl Client {
                 notionrs::object::block::Block::Column { column: _ } => continue,
                 notionrs::object::block::Block::Divider { divider: _ } => {
                     let component = jarkup_rs::Divider {
-                        inline: false,
                         props: None,
                         slots: None,
                     };
@@ -212,7 +205,6 @@ impl Client {
                 notionrs::object::block::Block::Embed { embed: _ } => continue,
                 notionrs::object::block::Block::Equation { equation } => {
                     let component = jarkup_rs::Katex {
-                        inline: false,
                         props: jarkup_rs::KatexProps {
                             expression: equation.expression,
                         },
@@ -223,7 +215,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::File { file } => {
                     let component = jarkup_rs::File {
-                        inline: false,
                         props: jarkup_rs::FileProps {
                             src: file.get_url(),
                             name: match file {
@@ -242,7 +233,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Heading1 { heading_1 } => {
                     let component = jarkup_rs::Heading {
-                        inline: false,
                         props: jarkup_rs::HeadingProps {
                             level: jarkup_rs::HeadingLevel::H1,
                         },
@@ -255,7 +245,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Heading2 { heading_2 } => {
                     let component = jarkup_rs::Heading {
-                        inline: false,
                         props: jarkup_rs::HeadingProps {
                             level: jarkup_rs::HeadingLevel::H2,
                         },
@@ -268,7 +257,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Heading3 { heading_3 } => {
                     let component = jarkup_rs::Heading {
-                        inline: false,
                         props: jarkup_rs::HeadingProps {
                             level: jarkup_rs::HeadingLevel::H3,
                         },
@@ -291,7 +279,6 @@ impl Client {
                     .map(|c| c.into_iter().map(|r| r.to_string()).collect::<String>());
 
                     let component = jarkup_rs::Image {
-                        inline: false,
                         props: jarkup_rs::ImageProps {
                             src: image.get_url(),
                             alt: maybe_caption,
@@ -304,7 +291,6 @@ impl Client {
                 notionrs::object::block::Block::LinkPreview { link_preview: _ } => continue,
                 notionrs::object::block::Block::NumberedListItem { numbered_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
                             default: self.convert_rich_text(numbered_list_item.rich_text).await?,
@@ -345,7 +331,6 @@ impl Client {
                     };
 
                     let component = jarkup_rs::List {
-                        inline: false,
                         props: Some(jarkup_rs::ListProps {
                             list_style: Some(jarkup_rs::ListStyle::Ordered),
                         }),
@@ -358,7 +343,6 @@ impl Client {
                 }
                 notionrs::object::block::Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ParagraphSlots {
                             default: self.convert_rich_text(paragraph.rich_text).await?,
@@ -372,7 +356,6 @@ impl Client {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if quote.rich_text.len() > 0 {
                             let paragraph = jarkup_rs::Paragraph {
-                                inline: false,
                                 props: None,
                                 slots: jarkup_rs::ParagraphSlots {
                                     default: self.convert_rich_text(quote.rich_text).await?,
@@ -395,7 +378,6 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::BlockQuote {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::BlockQuoteSlots {
                             default: merged_components,
@@ -456,7 +438,6 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::Table {
-                        inline: false,
                         props: Some(jarkup_rs::TableProps {
                             has_column_header: Some(table.has_column_header),
                             has_row_header: Some(table.has_row_header),
@@ -475,7 +456,6 @@ impl Client {
                         let children_inline_componense = self.convert_rich_text(cell).await?;
 
                         let component = jarkup_rs::TableCell {
-                            inline: false,
                             props: None,
                             slots: jarkup_rs::TableCellSlots {
                                 default: children_inline_componense,
@@ -497,7 +477,6 @@ impl Client {
                     let summary_components = self.convert_rich_text(toggle.rich_text).await?;
 
                     let component = jarkup_rs::Toggle {
-                        inline: false,
                         props: None,
                         slots: jarkup_rs::ToggleSlots {
                             default: children_components,
@@ -531,7 +510,6 @@ impl Client {
                     href: _,
                 } => {
                     let component = jarkup_rs::Text {
-                        inline: true,
                         props: jarkup_rs::TextProps {
                             text: plain_text,
                             color: match annotations.color {
@@ -638,7 +616,6 @@ impl Client {
                                 link_mention,
                             } => {
                                 let component = jarkup_rs::Text {
-                                    inline: true,
                                     props: jarkup_rs::TextProps {
                                         text: plain_text,
                                         favicon: self
@@ -671,7 +648,6 @@ impl Client {
                                 custom_emoji,
                             } => {
                                 let component = jarkup_rs::Icon {
-                                    inline: true,
                                     props: jarkup_rs::IconProps {
                                         src: custom_emoji.url,
                                         alt: Some(custom_emoji.name),
@@ -694,7 +670,6 @@ impl Client {
                     href: _href,
                 } => {
                     let component = jarkup_rs::Text {
-                        inline: true,
                         props: jarkup_rs::TextProps {
                             text: equation.expression,
                             katex: Some(true),

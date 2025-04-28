@@ -14,7 +14,7 @@ readme = "./README.md"
 [dependencies]
 async-recursion = "1.1.1"
 html-meta-scraper = "0.1.0"
-jarkup-rs = "0.1.2"
+jarkup-rs = "0.2.2"
 notionrs = "1.0.0-alpha.40"
 reqwest = { version = "0.12.15", default-features = false, features = [
     "rustls-tls",

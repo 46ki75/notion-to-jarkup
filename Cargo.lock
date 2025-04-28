@@ -650,9 +650,9 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 
 [[package]]
 name = "jarkup-rs"
-version = "0.1.2"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2649cac91ce311635a2526fb6b8e0d86238d48c90b51fb13bec55dcd1a87c902"
+checksum = "6c51bd0a02948d665e8e07b118a255736c9ee95a8e8efb38cdb2387dc48bc193"
 dependencies = [
  "serde",
 ]
