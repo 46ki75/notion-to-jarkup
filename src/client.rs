@@ -51,7 +51,60 @@ impl Client {
                     components.push(component.into());
                 }
                 notionrs::object::block::Block::Breadcrumb { breadcrumb: _ } => continue,
-                notionrs::object::block::Block::BulletedListItem { bulleted_list_item } => todo!(),
+                notionrs::object::block::Block::BulletedListItem { bulleted_list_item } => {
+                    let list_item_component = jarkup_rs::ListItem {
+                        inline: false,
+                        props: None,
+                        slots: jarkup_rs::ListItemSlots {
+                            default: self.convert_rich_text(bulleted_list_item.rich_text).await?,
+                        },
+                    };
+
+                    let maybe_prev_component = components.first_mut().and_then(|c| match c {
+                        jarkup_rs::Component::InlineComponent(_) => None,
+                        jarkup_rs::Component::BlockComponent(block_component) => {
+                            match block_component {
+                                jarkup_rs::BlockComponent::List(list) => Some(list),
+                                _ => None,
+                            }
+                        }
+                    });
+
+                    match maybe_prev_component {
+                        Some(prev_component) => {
+                            let is_unordered = prev_component
+                                .props
+                                .clone()
+                                .map(|p| {
+                                    matches!(p.list_style, Some(jarkup_rs::ListStyle::Unordered))
+                                })
+                                .unwrap_or(true);
+
+                            if is_unordered {
+                                prev_component
+                                    .slots
+                                    .default
+                                    .push(list_item_component.into());
+
+                                continue;
+                            }
+                        }
+
+                        None => {}
+                    };
+
+                    let component = jarkup_rs::List {
+                        inline: false,
+                        props: Some(jarkup_rs::ListProps {
+                            list_style: Some(jarkup_rs::ListStyle::Unordered),
+                        }),
+                        slots: jarkup_rs::ListSlots {
+                            default: vec![list_item_component],
+                        },
+                    };
+
+                    components.push(component.into());
+                }
                 notionrs::object::block::Block::Callout { callout } => {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if callout.rich_text.len() > 0 {
@@ -123,8 +176,8 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::ChildDatabase { child_database } => todo!(),
-                notionrs::object::block::Block::ChildPage { child_page } => todo!(),
+                notionrs::object::block::Block::ChildDatabase { child_database: _ } => continue,
+                notionrs::object::block::Block::ChildPage { child_page: _ } => continue,
                 notionrs::object::block::Block::Code { code } => {
                     let component = jarkup_rs::CodeBlock {
                         inline: false,
@@ -145,9 +198,9 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::ColumnList { column_list } => todo!(),
-                notionrs::object::block::Block::Column { column } => todo!(),
-                notionrs::object::block::Block::Divider { divider } => {
+                notionrs::object::block::Block::ColumnList { column_list: _ } => continue,
+                notionrs::object::block::Block::Column { column: _ } => continue,
+                notionrs::object::block::Block::Divider { divider: _ } => {
                     let component = jarkup_rs::Divider {
                         inline: false,
                         props: None,
@@ -156,7 +209,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Embed { embed } => continue,
+                notionrs::object::block::Block::Embed { embed: _ } => continue,
                 notionrs::object::block::Block::Equation { equation } => {
                     let component = jarkup_rs::Katex {
                         inline: false,
@@ -249,7 +302,60 @@ impl Client {
                     components.push(component.into());
                 }
                 notionrs::object::block::Block::LinkPreview { link_preview: _ } => continue,
-                notionrs::object::block::Block::NumberedListItem { numbered_list_item } => todo!(),
+                notionrs::object::block::Block::NumberedListItem { numbered_list_item } => {
+                    let list_item_component = jarkup_rs::ListItem {
+                        inline: false,
+                        props: None,
+                        slots: jarkup_rs::ListItemSlots {
+                            default: self.convert_rich_text(numbered_list_item.rich_text).await?,
+                        },
+                    };
+
+                    let maybe_prev_component = components.first_mut().and_then(|c| match c {
+                        jarkup_rs::Component::InlineComponent(_) => None,
+                        jarkup_rs::Component::BlockComponent(block_component) => {
+                            match block_component {
+                                jarkup_rs::BlockComponent::List(list) => Some(list),
+                                _ => None,
+                            }
+                        }
+                    });
+
+                    match maybe_prev_component {
+                        Some(prev_component) => {
+                            let is_ordered = prev_component
+                                .props
+                                .clone()
+                                .map(|p| {
+                                    matches!(p.list_style, Some(jarkup_rs::ListStyle::Ordered))
+                                })
+                                .unwrap_or(true);
+
+                            if is_ordered {
+                                prev_component
+                                    .slots
+                                    .default
+                                    .push(list_item_component.into());
+
+                                continue;
+                            }
+                        }
+
+                        None => {}
+                    };
+
+                    let component = jarkup_rs::List {
+                        inline: false,
+                        props: Some(jarkup_rs::ListProps {
+                            list_style: Some(jarkup_rs::ListStyle::Ordered),
+                        }),
+                        slots: jarkup_rs::ListSlots {
+                            default: vec![list_item_component],
+                        },
+                    };
+
+                    components.push(component.into());
+                }
                 notionrs::object::block::Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
                         inline: false,
