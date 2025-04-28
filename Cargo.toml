@@ -2,6 +2,14 @@
 name = "notion-to-jarkup"
 version = "0.1.0"
 edition = "2024"
+description = "Convert Notion blocks into jarkup JSON."
+authors = ["Chomolungma Shirayuki"]
+repository = "https://github.com/46ki75/notion-to-jarkup"
+license = "MIT"
+documentation = "https://docs.rs/notion-to-jarkup"
+categories = ["web-programming", "parsing", "data-structures"]
+keywords = ["notion"]
+readme = "./README.md"
 
 [dependencies]
 async-recursion = "1.1.1"
