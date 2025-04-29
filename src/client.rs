@@ -223,9 +223,13 @@ impl Client {
                                 .join(""),
                             language: code.language.to_string(),
                         },
-                        slots: Some(jarkup_rs::CodeBlockSlots {
-                            default: self.convert_rich_text(code.caption).await?,
-                        }),
+                        slots: if code.caption.len() > 0 {
+                            Some(jarkup_rs::CodeBlockSlots {
+                                default: self.convert_rich_text(code.caption).await?,
+                            })
+                        } else {
+                            None
+                        },
                     };
 
                     components.push(component.into());
