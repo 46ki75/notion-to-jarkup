@@ -280,82 +280,37 @@ impl Client {
                     components.push(component.into());
                 }
                 notionrs::object::block::Block::Heading1 { heading_1 } => {
-                    let component: jarkup_rs::Component = if heading_1.is_toggleable {
-                        let children = self.convert_block(&block.id).await?;
+                    let component = self
+                        .convert_heading_block(heading_1, &block.id, jarkup_rs::HeadingLevel::H1)
+                        .await?;
 
-                        jarkup_rs::Toggle {
-                            props: None,
-                            slots: jarkup_rs::ToggleSlots {
-                                default: children,
-                                summary: self.convert_rich_text(heading_1.rich_text).await?,
-                            },
-                        }
-                        .into()
+                    if let Some(c) = component {
+                        components.push(c);
                     } else {
-                        jarkup_rs::Heading {
-                            props: jarkup_rs::HeadingProps {
-                                level: jarkup_rs::HeadingLevel::H1,
-                            },
-                            slots: jarkup_rs::HeadingSlots {
-                                default: self.convert_rich_text(heading_1.rich_text).await?,
-                            },
-                        }
-                        .into()
+                        continue;
                     };
-
-                    components.push(component);
                 }
                 notionrs::object::block::Block::Heading2 { heading_2 } => {
-                    let component: jarkup_rs::Component = if heading_2.is_toggleable {
-                        let children = self.convert_block(&block.id).await?;
+                    let component = self
+                        .convert_heading_block(heading_2, &block.id, jarkup_rs::HeadingLevel::H2)
+                        .await?;
 
-                        jarkup_rs::Toggle {
-                            props: None,
-                            slots: jarkup_rs::ToggleSlots {
-                                default: children,
-                                summary: self.convert_rich_text(heading_2.rich_text).await?,
-                            },
-                        }
-                        .into()
+                    if let Some(c) = component {
+                        components.push(c);
                     } else {
-                        jarkup_rs::Heading {
-                            props: jarkup_rs::HeadingProps {
-                                level: jarkup_rs::HeadingLevel::H2,
-                            },
-                            slots: jarkup_rs::HeadingSlots {
-                                default: self.convert_rich_text(heading_2.rich_text).await?,
-                            },
-                        }
-                        .into()
+                        continue;
                     };
-
-                    components.push(component);
                 }
                 notionrs::object::block::Block::Heading3 { heading_3 } => {
-                    let component: jarkup_rs::Component = if heading_3.is_toggleable {
-                        let children = self.convert_block(&block.id).await?;
+                    let component = self
+                        .convert_heading_block(heading_3, &block.id, jarkup_rs::HeadingLevel::H3)
+                        .await?;
 
-                        jarkup_rs::Toggle {
-                            props: None,
-                            slots: jarkup_rs::ToggleSlots {
-                                default: children,
-                                summary: self.convert_rich_text(heading_3.rich_text).await?,
-                            },
-                        }
-                        .into()
+                    if let Some(c) = component {
+                        components.push(c);
                     } else {
-                        jarkup_rs::Heading {
-                            props: jarkup_rs::HeadingProps {
-                                level: jarkup_rs::HeadingLevel::H3,
-                            },
-                            slots: jarkup_rs::HeadingSlots {
-                                default: self.convert_rich_text(heading_3.rich_text).await?,
-                            },
-                        }
-                        .into()
+                        continue;
                     };
-
-                    components.push(component);
                 }
                 notionrs::object::block::Block::Image { image } => {
                     let maybe_caption = match image.clone() {
@@ -833,5 +788,35 @@ impl Client {
         let html = res.text().await.ok()?;
         let meta_scraper = html_meta_scraper::MetaScraper::new(&html);
         meta_scraper.favicon()
+    }
+
+    pub(crate) async fn convert_heading_block(
+        &self,
+        heading_block: notionrs::object::block::HeadingBlock,
+        block_id: &str,
+        level: jarkup_rs::HeadingLevel,
+    ) -> Result<Option<jarkup_rs::Component>, crate::error::Error> {
+        let component: jarkup_rs::Component = if heading_block.is_toggleable {
+            let children = self.convert_block(block_id).await?;
+
+            jarkup_rs::Toggle {
+                props: None,
+                slots: jarkup_rs::ToggleSlots {
+                    default: children,
+                    summary: self.convert_rich_text(heading_block.rich_text).await?,
+                },
+            }
+            .into()
+        } else {
+            jarkup_rs::Heading {
+                props: jarkup_rs::HeadingProps { level },
+                slots: jarkup_rs::HeadingSlots {
+                    default: self.convert_rich_text(heading_block.rich_text).await?,
+                },
+            }
+            .into()
+        };
+
+        Ok(Some(component))
     }
 }
