@@ -1,3 +1,5 @@
+use notionrs::prelude::*;
+
 #[derive(Debug)]
 pub struct Client {
     pub notionrs_client: notionrs::client::Client,
@@ -591,14 +593,14 @@ impl Client {
 
     pub async fn convert_rich_text(
         &self,
-        rich_text_vec: Vec<notionrs::object::rich_text::RichText>,
+        rich_text_vec: Vec<RichText>,
     ) -> Result<Vec<jarkup_rs::InlineComponent>, crate::error::Error> {
         let mut components: Vec<jarkup_rs::InlineComponent> = Vec::new();
 
         for rich_text in rich_text_vec {
             let component: Result<jarkup_rs::InlineComponent, crate::error::Error> = match rich_text
             {
-                notionrs::object::rich_text::RichText::Text {
+                RichText::Text {
                     text,
                     annotations,
                     plain_text,
@@ -688,7 +690,7 @@ impl Client {
 
                     Ok(component.into())
                 }
-                notionrs::object::rich_text::RichText::Mention {
+                RichText::Mention {
                     mention,
                     annotations: _annotations,
                     plain_text,
@@ -696,20 +698,16 @@ impl Client {
                 } => {
                     let component: Result<jarkup_rs::InlineComponent, crate::error::Error> =
                         match mention {
-                            notionrs::object::rich_text::mention::Mention::User { user: _ } => {
+                            Mention::User { user: _ } => {
                                 continue;
                             }
-                            notionrs::object::rich_text::mention::Mention::Date { date: _ } => {
+                            Mention::Date { date: _ } => {
                                 continue;
                             }
-                            notionrs::object::rich_text::mention::Mention::LinkPreview {
-                                link_preview: _,
-                            } => {
+                            Mention::LinkPreview { link_preview: _ } => {
                                 continue;
                             }
-                            notionrs::object::rich_text::mention::Mention::LinkMention {
-                                link_mention,
-                            } => {
+                            Mention::LinkMention { link_mention } => {
                                 let component = jarkup_rs::Text {
                                     props: jarkup_rs::TextProps {
                                         text: plain_text,
@@ -726,22 +724,18 @@ impl Client {
 
                                 Ok(inline_component)
                             }
-                            notionrs::object::rich_text::mention::Mention::TemplateMention {
+                            Mention::TemplateMention {
                                 template_mention: _,
                             } => {
                                 continue;
                             }
-                            notionrs::object::rich_text::mention::Mention::Page { page: _ } => {
+                            Mention::Page { page: _ } => {
                                 continue;
                             }
-                            notionrs::object::rich_text::mention::Mention::Database {
-                                database: _,
-                            } => {
+                            Mention::Database { database: _ } => {
                                 continue;
                             }
-                            notionrs::object::rich_text::mention::Mention::CustomEmoji {
-                                custom_emoji,
-                            } => {
+                            Mention::CustomEmoji { custom_emoji } => {
                                 let component = jarkup_rs::Icon {
                                     props: jarkup_rs::IconProps {
                                         src: custom_emoji.url,
@@ -758,7 +752,7 @@ impl Client {
 
                     component
                 }
-                notionrs::object::rich_text::RichText::Equation {
+                RichText::Equation {
                     equation,
                     annotations: _annotations,
                     plain_text: _plain_text,
@@ -792,7 +786,7 @@ impl Client {
 
     pub(crate) async fn convert_heading_block(
         &self,
-        heading_block: notionrs::object::block::HeadingBlock,
+        heading_block: HeadingBlock,
         block_id: &str,
         level: jarkup_rs::HeadingLevel,
     ) -> Result<Option<jarkup_rs::Component>, crate::error::Error> {
