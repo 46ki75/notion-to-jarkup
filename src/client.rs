@@ -1,4 +1,4 @@
-use notionrs::prelude::*;
+use notionrs_types::prelude::*;
 
 #[derive(Debug)]
 pub struct Client {
@@ -37,14 +37,14 @@ impl Client {
 
         for block in blocks {
             match block.block {
-                notionrs::object::block::Block::Audio { audio: _ } => {
+                notionrs_types::object::block::Block::Audio { audio: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Audio"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::Bookmark { bookmark } => {
+                notionrs_types::object::block::Block::Bookmark { bookmark } => {
                     let html = self
                         .reqwest_client
                         .get(&bookmark.url)
@@ -71,14 +71,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Breadcrumb { breadcrumb: _ } => {
+                notionrs_types::object::block::Block::Breadcrumb { breadcrumb: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Breadcrumb"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::BulletedListItem { bulleted_list_item } => {
+                notionrs_types::object::block::Block::BulletedListItem { bulleted_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
@@ -130,7 +130,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Callout { callout } => {
+                notionrs_types::object::block::Block::Callout { callout } => {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if callout.rich_text.len() > 0 {
                             Some(
@@ -160,34 +160,34 @@ impl Client {
                     let component = jarkup_rs::Callout {
                         props: Some(jarkup_rs::CalloutProps {
                             r#type: Some(match callout.color {
-                                notionrs::object::color::Color::Default
-                                | notionrs::object::color::Color::DefaultBackground
-                                | notionrs::object::color::Color::Blue
-                                | notionrs::object::color::Color::BlueBackground
-                                | notionrs::object::color::Color::Gray
-                                | notionrs::object::color::Color::GrayBackground => {
+                                notionrs_types::object::color::Color::Default
+                                | notionrs_types::object::color::Color::DefaultBackground
+                                | notionrs_types::object::color::Color::Blue
+                                | notionrs_types::object::color::Color::BlueBackground
+                                | notionrs_types::object::color::Color::Gray
+                                | notionrs_types::object::color::Color::GrayBackground => {
                                     jarkup_rs::CalloutType::Note
                                 }
-                                notionrs::object::color::Color::Green
-                                | notionrs::object::color::Color::GreenBackground => {
+                                notionrs_types::object::color::Color::Green
+                                | notionrs_types::object::color::Color::GreenBackground => {
                                     jarkup_rs::CalloutType::Tip
                                 }
-                                notionrs::object::color::Color::Purple
-                                | notionrs::object::color::Color::PurpleBackground => {
+                                notionrs_types::object::color::Color::Purple
+                                | notionrs_types::object::color::Color::PurpleBackground => {
                                     jarkup_rs::CalloutType::Important
                                 }
-                                notionrs::object::color::Color::Yellow
-                                | notionrs::object::color::Color::YellowBackground
-                                | notionrs::object::color::Color::Orange
-                                | notionrs::object::color::Color::OrangeBackground
-                                | notionrs::object::color::Color::Brown
-                                | notionrs::object::color::Color::BrownBackground => {
+                                notionrs_types::object::color::Color::Yellow
+                                | notionrs_types::object::color::Color::YellowBackground
+                                | notionrs_types::object::color::Color::Orange
+                                | notionrs_types::object::color::Color::OrangeBackground
+                                | notionrs_types::object::color::Color::Brown
+                                | notionrs_types::object::color::Color::BrownBackground => {
                                     jarkup_rs::CalloutType::Warning
                                 }
-                                notionrs::object::color::Color::Red
-                                | notionrs::object::color::Color::RedBackground
-                                | notionrs::object::color::Color::Pink
-                                | notionrs::object::color::Color::PinkBackground => {
+                                notionrs_types::object::color::Color::Red
+                                | notionrs_types::object::color::Color::RedBackground
+                                | notionrs_types::object::color::Color::Pink
+                                | notionrs_types::object::color::Color::PinkBackground => {
                                     jarkup_rs::CalloutType::Caution
                                 }
                             }),
@@ -199,21 +199,21 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::ChildDatabase { child_database: _ } => {
+                notionrs_types::object::block::Block::ChildDatabase { child_database: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("ChildDatabase"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::ChildPage { child_page: _ } => {
+                notionrs_types::object::block::Block::ChildPage { child_page: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("ChildPage"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::Code { code } => {
+                notionrs_types::object::block::Block::Code { code } => {
                     let component = jarkup_rs::CodeBlock {
                         props: jarkup_rs::CodeBlockProps {
                             code: code
@@ -236,9 +236,9 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::ColumnList { column_list: _ } => continue,
-                notionrs::object::block::Block::Column { column: _ } => continue,
-                notionrs::object::block::Block::Divider { divider: _ } => {
+                notionrs_types::object::block::Block::ColumnList { column_list: _ } => continue,
+                notionrs_types::object::block::Block::Column { column: _ } => continue,
+                notionrs_types::object::block::Block::Divider { divider: _ } => {
                     let component = jarkup_rs::Divider {
                         props: None,
                         slots: None,
@@ -246,14 +246,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Embed { embed: _ } => {
+                notionrs_types::object::block::Block::Embed { embed: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Embed"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::Equation { equation } => {
+                notionrs_types::object::block::Block::Equation { equation } => {
                     let component = jarkup_rs::Katex {
                         props: jarkup_rs::KatexProps {
                             expression: equation.expression,
@@ -263,15 +263,15 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::File { file } => {
+                notionrs_types::object::block::Block::File { file } => {
                     let component = jarkup_rs::File {
                         props: jarkup_rs::FileProps {
                             src: file.get_url(),
                             name: match file {
-                                notionrs::object::file::File::External(external_file) => {
+                                notionrs_types::object::file::File::External(external_file) => {
                                     external_file.name
                                 }
-                                notionrs::object::file::File::Uploaded(uploaded_file) => {
+                                notionrs_types::object::file::File::Uploaded(uploaded_file) => {
                                     uploaded_file.name
                                 }
                             },
@@ -281,7 +281,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Heading1 { heading_1 } => {
+                notionrs_types::object::block::Block::Heading1 { heading_1 } => {
                     let component = self
                         .convert_heading_block(heading_1, &block.id, jarkup_rs::HeadingLevel::H1)
                         .await?;
@@ -292,7 +292,7 @@ impl Client {
                         continue;
                     };
                 }
-                notionrs::object::block::Block::Heading2 { heading_2 } => {
+                notionrs_types::object::block::Block::Heading2 { heading_2 } => {
                     let component = self
                         .convert_heading_block(heading_2, &block.id, jarkup_rs::HeadingLevel::H2)
                         .await?;
@@ -303,7 +303,7 @@ impl Client {
                         continue;
                     };
                 }
-                notionrs::object::block::Block::Heading3 { heading_3 } => {
+                notionrs_types::object::block::Block::Heading3 { heading_3 } => {
                     let component = self
                         .convert_heading_block(heading_3, &block.id, jarkup_rs::HeadingLevel::H3)
                         .await?;
@@ -314,12 +314,12 @@ impl Client {
                         continue;
                     };
                 }
-                notionrs::object::block::Block::Image { image } => {
+                notionrs_types::object::block::Block::Image { image } => {
                     let maybe_caption = match image.clone() {
-                        notionrs::object::file::File::External(external_file) => {
+                        notionrs_types::object::file::File::External(external_file) => {
                             external_file.caption
                         }
-                        notionrs::object::file::File::Uploaded(uploaded_file) => {
+                        notionrs_types::object::file::File::Uploaded(uploaded_file) => {
                             uploaded_file.caption
                         }
                     }
@@ -335,14 +335,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::LinkPreview { link_preview: _ } => {
+                notionrs_types::object::block::Block::LinkPreview { link_preview: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("LinkPreview"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::NumberedListItem { numbered_list_item } => {
+                notionrs_types::object::block::Block::NumberedListItem { numbered_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
@@ -394,7 +394,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Paragraph { paragraph } => {
+                notionrs_types::object::block::Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
                         props: None,
                         slots: jarkup_rs::ParagraphSlots {
@@ -404,8 +404,8 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Pdf { pdf: _ } => {}
-                notionrs::object::block::Block::Quote { quote } => {
+                notionrs_types::object::block::Block::Pdf { pdf: _ } => {}
+                notionrs_types::object::block::Block::Quote { quote } => {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if quote.rich_text.len() > 0 {
                             let paragraph = jarkup_rs::Paragraph {
@@ -439,17 +439,17 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::SyncedBlock { synced_block: _ } => {
+                notionrs_types::object::block::Block::SyncedBlock { synced_block: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("SyncedBlock"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::TableOfContents {
+                notionrs_types::object::block::Block::TableOfContents {
                     table_of_contents: _,
                 } => continue,
-                notionrs::object::block::Block::Table { table } => {
+                notionrs_types::object::block::Block::Table { table } => {
                     let mut all_children_rows = self.convert_block(&block.id).await?;
 
                     let maybe_header_row =
@@ -513,7 +513,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::TableRow { table_row } => {
+                notionrs_types::object::block::Block::TableRow { table_row } => {
                     let mut cell_components: Vec<jarkup_rs::Component> = Vec::new();
 
                     for cell in table_row.cells {
@@ -538,21 +538,21 @@ impl Client {
 
                     components.push(row_component.into());
                 }
-                notionrs::object::block::Block::Template { template: _ } => {
+                notionrs_types::object::block::Block::Template { template: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Template"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::ToDo { to_do: _ } => {
+                notionrs_types::object::block::Block::ToDo { to_do: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("ToDo"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::Toggle { toggle } => {
+                notionrs_types::object::block::Block::Toggle { toggle } => {
                     let children_components = if block.has_children {
                         self.convert_block(&block.id).await?
                     } else {
@@ -571,14 +571,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs::object::block::Block::Video { video: _ } => {
+                notionrs_types::object::block::Block::Video { video: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Video"));
                     } else {
                         continue;
                     }
                 }
-                notionrs::object::block::Block::Unsupported => {
+                notionrs_types::object::block::Block::Unsupported => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Unsupported"));
                     } else {
@@ -610,63 +610,63 @@ impl Client {
                         props: jarkup_rs::TextProps {
                             text: plain_text,
                             color: match annotations.color {
-                                notionrs::object::color::Color::Default => None,
-                                notionrs::object::color::Color::Blue => {
+                                notionrs_types::object::color::Color::Default => None,
+                                notionrs_types::object::color::Color::Blue => {
                                     Some(String::from("#6987b8"))
                                 }
-                                notionrs::object::color::Color::Brown => {
+                                notionrs_types::object::color::Color::Brown => {
                                     Some(String::from("#8b4c3f"))
                                 }
-                                notionrs::object::color::Color::Gray => {
+                                notionrs_types::object::color::Color::Gray => {
                                     Some(String::from("#868e9c"))
                                 }
-                                notionrs::object::color::Color::Green => {
+                                notionrs_types::object::color::Color::Green => {
                                     Some(String::from("#59b57c"))
                                 }
-                                notionrs::object::color::Color::Orange => {
+                                notionrs_types::object::color::Color::Orange => {
                                     Some(String::from("#bf7e71"))
                                 }
-                                notionrs::object::color::Color::Pink => {
+                                notionrs_types::object::color::Color::Pink => {
                                     Some(String::from("#c9699e"))
                                 }
-                                notionrs::object::color::Color::Purple => {
+                                notionrs_types::object::color::Color::Purple => {
                                     Some(String::from("#9771bd"))
                                 }
-                                notionrs::object::color::Color::Red => {
+                                notionrs_types::object::color::Color::Red => {
                                     Some(String::from("#b36472"))
                                 }
-                                notionrs::object::color::Color::Yellow => {
+                                notionrs_types::object::color::Color::Yellow => {
                                     Some(String::from("#b8a36e"))
                                 }
                                 _ => None,
                             },
                             background_color: match annotations.color {
-                                notionrs::object::color::Color::Default => None,
-                                notionrs::object::color::Color::BlueBackground => {
+                                notionrs_types::object::color::Color::Default => None,
+                                notionrs_types::object::color::Color::BlueBackground => {
                                     Some(String::from("#6987b8"))
                                 }
-                                notionrs::object::color::Color::BrownBackground => {
+                                notionrs_types::object::color::Color::BrownBackground => {
                                     Some(String::from("#8b4c3f"))
                                 }
-                                notionrs::object::color::Color::GrayBackground => {
+                                notionrs_types::object::color::Color::GrayBackground => {
                                     Some(String::from("#868e9c"))
                                 }
-                                notionrs::object::color::Color::GreenBackground => {
+                                notionrs_types::object::color::Color::GreenBackground => {
                                     Some(String::from("#59b57c"))
                                 }
-                                notionrs::object::color::Color::OrangeBackground => {
+                                notionrs_types::object::color::Color::OrangeBackground => {
                                     Some(String::from("#bf7e71"))
                                 }
-                                notionrs::object::color::Color::PinkBackground => {
+                                notionrs_types::object::color::Color::PinkBackground => {
                                     Some(String::from("#c9699e"))
                                 }
-                                notionrs::object::color::Color::PurpleBackground => {
+                                notionrs_types::object::color::Color::PurpleBackground => {
                                     Some(String::from("#9771bd"))
                                 }
-                                notionrs::object::color::Color::RedBackground => {
+                                notionrs_types::object::color::Color::RedBackground => {
                                     Some(String::from("#b36472"))
                                 }
-                                notionrs::object::color::Color::YellowBackground => {
+                                notionrs_types::object::color::Color::YellowBackground => {
                                     Some(String::from("#b8a36e"))
                                 }
                                 _ => None,
