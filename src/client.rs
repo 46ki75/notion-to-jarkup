@@ -677,6 +677,7 @@ impl Client {
                             strikethrough: Some(annotations.strikethrough),
                             katex: None,
                             code: Some(annotations.code),
+                            kbd: None,
                             ruby: None,
                             favicon: if let Some(l) = &text.link {
                                 self.fetch_favicon_by_url(&l.url).await
@@ -812,5 +813,56 @@ impl Client {
         };
 
         Ok(Some(component))
+    }
+
+    pub(crate) fn is_kbd(&self, plain_text: &str) -> bool {
+        const SPECIAL_KEYS: &[&str] = &[
+            "ctrl",
+            "shift",
+            "alt",
+            "meta",
+            "escape",
+            "tab",
+            "capslock",
+            "enter",
+            "backspace",
+            "space",
+            "arrowup",
+            "arrowdown",
+            "arrowleft",
+            "arrowright",
+            "insert",
+            "delete",
+            "home",
+            "end",
+            "pageup",
+            "pagedown",
+            "f1",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f8",
+            "f9",
+            "f10",
+            "f11",
+            "f12",
+            "contextmenu",
+            "numlock",
+            "scrolllock",
+            "pause",
+        ];
+
+        if plain_text.len() == 1 {
+            return true;
+        };
+
+        if SPECIAL_KEYS.contains(&plain_text.to_lowercase().as_ref()) {
+            return true;
+        };
+
+        return false;
     }
 }
