@@ -606,86 +606,98 @@ impl Client {
                     plain_text,
                     href: _,
                 } => {
-                    let component = jarkup_rs::Text {
-                        props: jarkup_rs::TextProps {
-                            text: plain_text,
-                            color: match annotations.color {
-                                notionrs_types::object::color::Color::Default => None,
-                                notionrs_types::object::color::Color::Blue => {
-                                    Some(String::from("#6987b8"))
-                                }
-                                notionrs_types::object::color::Color::Brown => {
-                                    Some(String::from("#8b4c3f"))
-                                }
-                                notionrs_types::object::color::Color::Gray => {
-                                    Some(String::from("#868e9c"))
-                                }
-                                notionrs_types::object::color::Color::Green => {
-                                    Some(String::from("#59b57c"))
-                                }
-                                notionrs_types::object::color::Color::Orange => {
-                                    Some(String::from("#bf7e71"))
-                                }
-                                notionrs_types::object::color::Color::Pink => {
-                                    Some(String::from("#c9699e"))
-                                }
-                                notionrs_types::object::color::Color::Purple => {
-                                    Some(String::from("#9771bd"))
-                                }
-                                notionrs_types::object::color::Color::Red => {
-                                    Some(String::from("#b36472"))
-                                }
-                                notionrs_types::object::color::Color::Yellow => {
-                                    Some(String::from("#b8a36e"))
-                                }
-                                _ => None,
+                    let component = if self.is_kbd(&plain_text, annotations.code) {
+                        jarkup_rs::Text {
+                            props: jarkup_rs::TextProps {
+                                text: plain_text,
+                                kbd: Some(true),
+                                ..Default::default()
                             },
-                            background_color: match annotations.color {
-                                notionrs_types::object::color::Color::Default => None,
-                                notionrs_types::object::color::Color::BlueBackground => {
-                                    Some(String::from("#6987b8"))
-                                }
-                                notionrs_types::object::color::Color::BrownBackground => {
-                                    Some(String::from("#8b4c3f"))
-                                }
-                                notionrs_types::object::color::Color::GrayBackground => {
-                                    Some(String::from("#868e9c"))
-                                }
-                                notionrs_types::object::color::Color::GreenBackground => {
-                                    Some(String::from("#59b57c"))
-                                }
-                                notionrs_types::object::color::Color::OrangeBackground => {
-                                    Some(String::from("#bf7e71"))
-                                }
-                                notionrs_types::object::color::Color::PinkBackground => {
-                                    Some(String::from("#c9699e"))
-                                }
-                                notionrs_types::object::color::Color::PurpleBackground => {
-                                    Some(String::from("#9771bd"))
-                                }
-                                notionrs_types::object::color::Color::RedBackground => {
-                                    Some(String::from("#b36472"))
-                                }
-                                notionrs_types::object::color::Color::YellowBackground => {
-                                    Some(String::from("#b8a36e"))
-                                }
-                                _ => None,
+                            ..Default::default()
+                        }
+                    } else {
+                        jarkup_rs::Text {
+                            props: jarkup_rs::TextProps {
+                                text: plain_text,
+                                color: match annotations.color {
+                                    notionrs_types::object::color::Color::Default => None,
+                                    notionrs_types::object::color::Color::Blue => {
+                                        Some(String::from("#6987b8"))
+                                    }
+                                    notionrs_types::object::color::Color::Brown => {
+                                        Some(String::from("#8b4c3f"))
+                                    }
+                                    notionrs_types::object::color::Color::Gray => {
+                                        Some(String::from("#868e9c"))
+                                    }
+                                    notionrs_types::object::color::Color::Green => {
+                                        Some(String::from("#59b57c"))
+                                    }
+                                    notionrs_types::object::color::Color::Orange => {
+                                        Some(String::from("#bf7e71"))
+                                    }
+                                    notionrs_types::object::color::Color::Pink => {
+                                        Some(String::from("#c9699e"))
+                                    }
+                                    notionrs_types::object::color::Color::Purple => {
+                                        Some(String::from("#9771bd"))
+                                    }
+                                    notionrs_types::object::color::Color::Red => {
+                                        Some(String::from("#b36472"))
+                                    }
+                                    notionrs_types::object::color::Color::Yellow => {
+                                        Some(String::from("#b8a36e"))
+                                    }
+                                    _ => None,
+                                },
+                                background_color: match annotations.color {
+                                    notionrs_types::object::color::Color::Default => None,
+                                    notionrs_types::object::color::Color::BlueBackground => {
+                                        Some(String::from("#6987b8"))
+                                    }
+                                    notionrs_types::object::color::Color::BrownBackground => {
+                                        Some(String::from("#8b4c3f"))
+                                    }
+                                    notionrs_types::object::color::Color::GrayBackground => {
+                                        Some(String::from("#868e9c"))
+                                    }
+                                    notionrs_types::object::color::Color::GreenBackground => {
+                                        Some(String::from("#59b57c"))
+                                    }
+                                    notionrs_types::object::color::Color::OrangeBackground => {
+                                        Some(String::from("#bf7e71"))
+                                    }
+                                    notionrs_types::object::color::Color::PinkBackground => {
+                                        Some(String::from("#c9699e"))
+                                    }
+                                    notionrs_types::object::color::Color::PurpleBackground => {
+                                        Some(String::from("#9771bd"))
+                                    }
+                                    notionrs_types::object::color::Color::RedBackground => {
+                                        Some(String::from("#b36472"))
+                                    }
+                                    notionrs_types::object::color::Color::YellowBackground => {
+                                        Some(String::from("#b8a36e"))
+                                    }
+                                    _ => None,
+                                },
+                                bold: Some(annotations.bold),
+                                italic: Some(annotations.italic),
+                                underline: Some(annotations.underline),
+                                strikethrough: Some(annotations.strikethrough),
+                                katex: None,
+                                code: Some(annotations.code),
+                                kbd: None,
+                                ruby: None,
+                                favicon: if let Some(l) = &text.link {
+                                    self.fetch_favicon_by_url(&l.url).await
+                                } else {
+                                    None
+                                },
+                                href: text.link.map(|l| l.url),
                             },
-                            bold: Some(annotations.bold),
-                            italic: Some(annotations.italic),
-                            underline: Some(annotations.underline),
-                            strikethrough: Some(annotations.strikethrough),
-                            katex: None,
-                            code: Some(annotations.code),
-                            ruby: None,
-                            favicon: if let Some(l) = &text.link {
-                                self.fetch_favicon_by_url(&l.url).await
-                            } else {
-                                None
-                            },
-                            href: text.link.map(|l| l.url),
-                        },
-                        slots: None,
+                            slots: None,
+                        }
                     };
 
                     Ok(component.into())
@@ -812,5 +824,60 @@ impl Client {
         };
 
         Ok(Some(component))
+    }
+
+    pub(crate) fn is_kbd(&self, plain_text: &str, is_code: bool) -> bool {
+        const SPECIAL_KEYS: &[&str] = &[
+            "ctrl",
+            "shift",
+            "alt",
+            "meta",
+            "escape",
+            "tab",
+            "capslock",
+            "enter",
+            "backspace",
+            "space",
+            "arrowup",
+            "arrowdown",
+            "arrowleft",
+            "arrowright",
+            "insert",
+            "delete",
+            "home",
+            "end",
+            "pageup",
+            "pagedown",
+            "f1",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f8",
+            "f9",
+            "f10",
+            "f11",
+            "f12",
+            "contextmenu",
+            "numlock",
+            "scrolllock",
+            "pause",
+        ];
+
+        if !is_code {
+            return false;
+        };
+
+        if plain_text.len() == 1 {
+            return true;
+        };
+
+        if SPECIAL_KEYS.contains(&plain_text.to_lowercase().as_ref()) {
+            return true;
+        };
+
+        return false;
     }
 }
