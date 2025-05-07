@@ -13,6 +13,7 @@ pub struct Client {
 impl Client {
     fn create_unsupported_component(&self, block_name: &str) -> jarkup_rs::Component {
         jarkup_rs::Unsupported {
+            id: None,
             props: Some(jarkup_rs::UnsupportedProps {
                 details: format!("Notion: `{} Block` is not supported.", block_name),
             }),
@@ -60,6 +61,7 @@ impl Client {
                     let image = meta_scraper.image();
 
                     let component = jarkup_rs::Bookmark {
+                        id: Some(block.id),
                         props: jarkup_rs::BookmarkProps {
                             url: bookmark.url,
                             title,
@@ -80,6 +82,7 @@ impl Client {
                 }
                 notionrs_types::object::block::Block::BulletedListItem { bulleted_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
+                        id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
                             default: self.convert_rich_text(bulleted_list_item.rich_text).await?,
@@ -120,6 +123,7 @@ impl Client {
                     };
 
                     let component = jarkup_rs::List {
+                        id: None,
                         props: Some(jarkup_rs::ListProps {
                             list_style: Some(jarkup_rs::ListStyle::Unordered),
                         }),
@@ -135,6 +139,7 @@ impl Client {
                         if callout.rich_text.len() > 0 {
                             Some(
                                 jarkup_rs::Paragraph {
+                                    id: Some(block.id.clone()),
                                     props: None,
                                     slots: jarkup_rs::ParagraphSlots {
                                         default: self.convert_rich_text(callout.rich_text).await?,
@@ -158,6 +163,7 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::Callout {
+                        id: Some(block.id),
                         props: Some(jarkup_rs::CalloutProps {
                             r#type: Some(match callout.color {
                                 notionrs_types::object::color::Color::Default
@@ -215,6 +221,7 @@ impl Client {
                 }
                 notionrs_types::object::block::Block::Code { code } => {
                     let component = jarkup_rs::CodeBlock {
+                        id: Some(block.id),
                         props: jarkup_rs::CodeBlockProps {
                             code: code
                                 .rich_text
@@ -240,6 +247,7 @@ impl Client {
                 notionrs_types::object::block::Block::Column { column: _ } => continue,
                 notionrs_types::object::block::Block::Divider { divider: _ } => {
                     let component = jarkup_rs::Divider {
+                        id: Some(block.id),
                         props: None,
                         slots: None,
                     };
@@ -255,6 +263,7 @@ impl Client {
                 }
                 notionrs_types::object::block::Block::Equation { equation } => {
                     let component = jarkup_rs::Katex {
+                        id: Some(block.id),
                         props: jarkup_rs::KatexProps {
                             expression: equation.expression,
                         },
@@ -265,6 +274,7 @@ impl Client {
                 }
                 notionrs_types::object::block::Block::File { file } => {
                     let component = jarkup_rs::File {
+                        id: Some(block.id),
                         props: jarkup_rs::FileProps {
                             src: file.get_url(),
                             name: match file {
@@ -326,6 +336,7 @@ impl Client {
                     .map(|c| c.into_iter().map(|r| r.to_string()).collect::<String>());
 
                     let component = jarkup_rs::Image {
+                        id: Some(block.id),
                         props: jarkup_rs::ImageProps {
                             src: image.get_url(),
                             alt: maybe_caption,
@@ -344,6 +355,7 @@ impl Client {
                 }
                 notionrs_types::object::block::Block::NumberedListItem { numbered_list_item } => {
                     let list_item_component = jarkup_rs::ListItem {
+                        id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
                             default: self.convert_rich_text(numbered_list_item.rich_text).await?,
@@ -384,6 +396,7 @@ impl Client {
                     };
 
                     let component = jarkup_rs::List {
+                        id: None,
                         props: Some(jarkup_rs::ListProps {
                             list_style: Some(jarkup_rs::ListStyle::Ordered),
                         }),
@@ -396,6 +409,7 @@ impl Client {
                 }
                 notionrs_types::object::block::Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
+                        id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::ParagraphSlots {
                             default: self.convert_rich_text(paragraph.rich_text).await?,
@@ -409,6 +423,7 @@ impl Client {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if quote.rich_text.len() > 0 {
                             let paragraph = jarkup_rs::Paragraph {
+                                id: Some(block.id.clone()),
                                 props: None,
                                 slots: jarkup_rs::ParagraphSlots {
                                     default: self.convert_rich_text(quote.rich_text).await?,
@@ -431,6 +446,7 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::BlockQuote {
+                        id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::BlockQuoteSlots {
                             default: merged_components,
@@ -500,6 +516,7 @@ impl Client {
                         .collect::<Vec<jarkup_rs::Component>>();
 
                     let component = jarkup_rs::Table {
+                        id: Some(block.id),
                         props: Some(jarkup_rs::TableProps {
                             has_column_header: Some(table.has_column_header),
                             has_row_header: Some(table.has_row_header),
@@ -520,6 +537,7 @@ impl Client {
                         let children_inline_componense = self.convert_rich_text(cell).await?;
 
                         let component = jarkup_rs::TableCell {
+                            id: None,
                             props: None,
                             slots: jarkup_rs::TableCellSlots {
                                 default: children_inline_componense,
@@ -530,6 +548,7 @@ impl Client {
                     }
 
                     let row_component = jarkup_rs::TableRow {
+                        id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::TableRowSlots {
                             default: cell_components,
@@ -562,6 +581,7 @@ impl Client {
                     let summary_components = self.convert_rich_text(toggle.rich_text).await?;
 
                     let component = jarkup_rs::Toggle {
+                        id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::ToggleSlots {
                             default: children_components,
@@ -617,6 +637,7 @@ impl Client {
                         }
                     } else {
                         jarkup_rs::Text {
+                            id: None,
                             props: jarkup_rs::TextProps {
                                 text: plain_text,
                                 color: match annotations.color {
@@ -721,6 +742,7 @@ impl Client {
                             }
                             Mention::LinkMention { link_mention } => {
                                 let component = jarkup_rs::Text {
+                                    id: None,
                                     props: jarkup_rs::TextProps {
                                         text: plain_text,
                                         favicon: self
@@ -749,6 +771,7 @@ impl Client {
                             }
                             Mention::CustomEmoji { custom_emoji } => {
                                 let component = jarkup_rs::Icon {
+                                    id: Some(custom_emoji.id),
                                     props: jarkup_rs::IconProps {
                                         src: custom_emoji.url,
                                         alt: Some(custom_emoji.name),
@@ -771,6 +794,7 @@ impl Client {
                     href: _href,
                 } => {
                     let component = jarkup_rs::Text {
+                        id: None,
                         props: jarkup_rs::TextProps {
                             text: equation.expression,
                             katex: Some(true),
@@ -806,6 +830,7 @@ impl Client {
             let children = self.convert_block(block_id).await?;
 
             jarkup_rs::Toggle {
+                id: Some(block_id.to_owned()),
                 props: None,
                 slots: jarkup_rs::ToggleSlots {
                     default: children,
@@ -815,6 +840,7 @@ impl Client {
             .into()
         } else {
             jarkup_rs::Heading {
+                id: Some(block_id.to_owned()),
                 props: jarkup_rs::HeadingProps { level },
                 slots: jarkup_rs::HeadingSlots {
                     default: self.convert_rich_text(heading_block.rich_text).await?,
