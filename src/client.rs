@@ -823,8 +823,17 @@ impl Client {
             .await
             .ok()?;
         let html = res.text().await.ok()?;
+        let parsed_url = url::Url::parse(url).ok()?;
+        let scheme = parsed_url.scheme();
+        let host = if let url::Host::Domain(domain) = parsed_url.host()? {
+            Some(domain.to_string())
+        } else {
+            None
+        }?;
         let meta_scraper = html_meta_scraper::MetaScraper::new(&html);
-        meta_scraper.favicon()
+        let base_url = url::Url::parse(&format!("{scheme}://{host}",)).ok()?;
+        let favicon_url = base_url.join(&meta_scraper.favicon()?).ok()?.to_string();
+        Some(favicon_url)
     }
 
     pub(crate) async fn convert_heading_block(
