@@ -49,6 +49,7 @@ impl Client {
                     let html = self
                         .reqwest_client
                         .get(&bookmark.url)
+                        .header("user-agent", "notion-to-jarkup")
                         .send()
                         .await?
                         .text()
@@ -814,7 +815,13 @@ impl Client {
     }
 
     pub(crate) async fn fetch_favicon_by_url(&self, url: &str) -> Option<String> {
-        let res = self.reqwest_client.get(url).send().await.ok()?;
+        let res = self
+            .reqwest_client
+            .get(url)
+            .header("user-agent", "notion-to-jarkup")
+            .send()
+            .await
+            .ok()?;
         let html = res.text().await.ok()?;
         let meta_scraper = html_meta_scraper::MetaScraper::new(&html);
         meta_scraper.favicon()
