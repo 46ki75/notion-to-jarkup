@@ -17,7 +17,7 @@ html-meta-scraper = "^0.1"
 jarkup-rs = "^0.4"
 notionrs = "1.0.0-beta"
 notionrs_types = "1.0.0-rc"
-reqwest = { version = "0.12.15", default-features = false, features = [
+reqwest = { version = "0.12.16", default-features = false, features = [
     "rustls-tls",
 ] }
 thiserror = "2"
