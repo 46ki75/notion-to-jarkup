@@ -29,12 +29,10 @@ impl Client {
     ) -> Result<Vec<jarkup_rs::Component>, crate::error::Error> {
         let mut components: Vec<jarkup_rs::Component> = Vec::new();
 
-        let blocks = self
-            .notionrs_client
-            .get_block_children_all()
-            .block_id(block_id)
-            .send()
-            .await?;
+        let blocks = notionrs::Client::paginate(
+            self.notionrs_client.get_block_children().block_id(block_id),
+        )
+        .await?;
 
         for block in blocks {
             match block.block {
@@ -282,9 +280,10 @@ impl Client {
                                 notionrs_types::object::file::File::External(external_file) => {
                                     external_file.name
                                 }
-                                notionrs_types::object::file::File::Uploaded(uploaded_file) => {
-                                    uploaded_file.name
-                                }
+                                notionrs_types::object::file::File::NotionHosted(
+                                    notion_hosted_file,
+                                ) => notion_hosted_file.name,
+                                _ => Some(String::from("untitled")),
                             },
                         },
                         slots: None,
@@ -328,13 +327,17 @@ impl Client {
                 notionrs_types::object::block::Block::Image { image } => {
                     let maybe_caption = match image.clone() {
                         notionrs_types::object::file::File::External(external_file) => {
-                            external_file.caption
+                            external_file
+                                .caption
+                                .map(|c| c.into_iter().map(|c| c.to_string()).collect::<String>())
                         }
-                        notionrs_types::object::file::File::Uploaded(uploaded_file) => {
-                            uploaded_file.caption
+                        notionrs_types::object::file::File::NotionHosted(notion_hosted_file) => {
+                            notion_hosted_file
+                                .caption
+                                .map(|c| c.into_iter().map(|c| c.to_string()).collect::<String>())
                         }
-                    }
-                    .map(|c| c.into_iter().map(|r| r.to_string()).collect::<String>());
+                        _ => Some(String::from("untitled")),
+                    };
 
                     let component = jarkup_rs::Image {
                         id: Some(block.id),
