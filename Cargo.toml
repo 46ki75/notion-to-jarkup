@@ -16,7 +16,7 @@ async-recursion = "^1.1"
 html-meta-scraper = "^0.1"
 jarkup-rs = "^0.4"
 notionrs = "1.0.0-beta.5"
-notionrs_types = "1.0.0-rc"
+notionrs_types = "1.0.0-rc.9"
 reqwest = { version = "0.12.18", default-features = false, features = [
     "rustls-tls",
 ] }
