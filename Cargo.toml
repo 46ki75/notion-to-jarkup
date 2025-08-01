@@ -13,7 +13,7 @@ readme = "./README.md"
 
 [dependencies]
 async-recursion = "^1.1"
-html-meta-scraper = "^0.1"
+html-meta-scraper = "^0.2"
 jarkup-rs = "^0.4"
 notionrs = "1.0.0-beta.6"
 notionrs_types = "1.0.0-rc.10"
