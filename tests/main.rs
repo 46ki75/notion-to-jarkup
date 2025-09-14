@@ -4,7 +4,7 @@ async fn convert() -> Result<(), Box<dyn std::error::Error>> {
     let notion_api_key = std::env::var("NOTION_API_KEY")?;
     let block_id = std::env::var("BLOCK_ID")?;
 
-    let notionrs_client = notionrs::client::Client::new().secret(notion_api_key);
+    let notionrs_client = notionrs::client::Client::new(notion_api_key);
     let reqwest_client = reqwest::Client::new();
 
     let client = notion_to_jarkup::client::Client {
