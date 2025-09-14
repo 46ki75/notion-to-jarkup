@@ -1,3 +1,5 @@
+use futures::TryStreamExt;
+use notionrs::PaginateExt;
 use notionrs_types::prelude::*;
 
 #[derive(Debug)]
@@ -29,10 +31,13 @@ impl Client {
     ) -> Result<Vec<jarkup_rs::Component>, crate::error::Error> {
         let mut components: Vec<jarkup_rs::Component> = Vec::new();
 
-        let blocks = notionrs::Client::paginate(
-            self.notionrs_client.get_block_children().block_id(block_id),
-        )
-        .await?;
+        let blocks: Vec<BlockResponse> = self
+            .notionrs_client
+            .get_block_children()
+            .block_id(block_id)
+            .into_stream()
+            .try_collect()
+            .await?;
 
         for block in blocks {
             match block.block {
