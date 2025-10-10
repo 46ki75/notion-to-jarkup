@@ -734,9 +734,9 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 
 [[package]]
 name = "jarkup-rs"
-version = "0.4.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24806c7db32c7caf8398a40aea54cc944695f488110a2ab0f7b678c84b6254b0"
+checksum = "de6a8d5803d56186a87ee10c3cc1fce01fc8b95bcaf8f46ae56bfd1c98eb5042"
 dependencies = [
  "serde",
 ]
@@ -860,7 +860,7 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "notion-to-jarkup"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "async-recursion",
  "dotenvy",
