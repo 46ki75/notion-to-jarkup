@@ -15,7 +15,7 @@ readme = "./README.md"
 async-recursion = "^1.1"
 futures = "0.3.31"
 html-meta-scraper = "^0.2"
-jarkup-rs = "^0.4"
+jarkup-rs = "^0.5.1"
 notionrs = "0.3.0"
 notionrs_types = "0.3.0"
 reqwest = { version = "0.12.23", default-features = false, features = [
