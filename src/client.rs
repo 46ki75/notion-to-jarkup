@@ -224,28 +224,45 @@ impl Client {
                     }
                 }
                 notionrs_types::object::block::Block::Code { code } => {
-                    let component = jarkup_rs::CodeBlock {
-                        id: Some(block.id),
-                        props: jarkup_rs::CodeBlockProps {
-                            code: code
-                                .rich_text
-                                .clone()
-                                .into_iter()
-                                .map(|r| r.to_string())
-                                .collect::<Vec<String>>()
-                                .join(""),
-                            language: code.language.to_string(),
-                        },
-                        slots: if code.caption.len() > 0 {
-                            Some(jarkup_rs::CodeBlockSlots {
-                                default: self.convert_rich_text(code.caption).await?,
-                            })
-                        } else {
-                            None
-                        },
+                    let component: jarkup_rs::Component = match code.language {
+                        Language::Mermaid => jarkup_rs::Mermaid {
+                            id: Some(block.id),
+                            props: jarkup_rs::MermaidProps {
+                                code: code
+                                    .rich_text
+                                    .clone()
+                                    .into_iter()
+                                    .map(|r| r.to_string())
+                                    .collect::<Vec<String>>()
+                                    .join(""),
+                            },
+                            slots: None,
+                        }
+                        .into(),
+                        _ => jarkup_rs::CodeBlock {
+                            id: Some(block.id),
+                            props: jarkup_rs::CodeBlockProps {
+                                code: code
+                                    .rich_text
+                                    .clone()
+                                    .into_iter()
+                                    .map(|r| r.to_string())
+                                    .collect::<Vec<String>>()
+                                    .join(""),
+                                language: code.language.to_string(),
+                            },
+                            slots: if code.caption.len() > 0 {
+                                Some(jarkup_rs::CodeBlockSlots {
+                                    default: self.convert_rich_text(code.caption).await?,
+                                })
+                            } else {
+                                None
+                            },
+                        }
+                        .into(),
                     };
 
-                    components.push(component.into());
+                    components.push(component);
                 }
                 notionrs_types::object::block::Block::ColumnList { column_list: _ } => continue,
                 notionrs_types::object::block::Block::Column { column: _ } => continue,
