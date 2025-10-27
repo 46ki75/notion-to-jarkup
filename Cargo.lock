@@ -868,7 +868,7 @@ dependencies = [
  "html-meta-scraper",
  "jarkup-rs",
  "notionrs",
- "notionrs_types",
+ "notionrs_types 0.4.1",
  "reqwest",
  "serde_json",
  "thiserror",
@@ -886,7 +886,7 @@ dependencies = [
  "bytes",
  "futures",
  "notionrs_macro",
- "notionrs_types",
+ "notionrs_types 0.3.0",
  "reqwest",
  "serde",
  "serde_json",
@@ -911,6 +911,18 @@ name = "notionrs_types"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a821fb5a12c755cc835ccf165be9d20156afa23a8767043a391d65b4dfaf066b"
+dependencies = [
+ "notionrs_macro",
+ "serde",
+ "serde_plain",
+ "time",
+]
+
+[[package]]
+name = "notionrs_types"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "734059511cba2fe259886e5d69dbf415274f9af387b0d18f457f3a3b563299d8"
 dependencies = [
  "notionrs_macro",
  "serde",

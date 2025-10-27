@@ -17,7 +17,7 @@ futures = "0.3.31"
 html-meta-scraper = "^0.2"
 jarkup-rs = "^0.5.1"
 notionrs = "0.3.0"
-notionrs_types = "0.3.0"
+notionrs_types = "0.4.1"
 reqwest = { version = "0.12.24", default-features = false, features = [
     "rustls-tls",
 ] }
