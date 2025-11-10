@@ -819,7 +819,7 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "notion-to-jarkup"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "async-recursion",
  "dotenvy",
@@ -837,9 +837,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs"
-version = "0.3.0"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3dc608ff0e5be1ba3c87506bf1deef90963fa522289ccd3e730e6d2dca48289b"
+checksum = "faa66be3046f1788569ecc11541b1c83a7b9a618fb21715b2e49472a59608160"
 dependencies = [
  "async-trait",
  "bytes",
@@ -867,9 +867,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs_types"
-version = "0.3.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a821fb5a12c755cc835ccf165be9d20156afa23a8767043a391d65b4dfaf066b"
+checksum = "734059511cba2fe259886e5d69dbf415274f9af387b0d18f457f3a3b563299d8"
 dependencies = [
  "notionrs_macro",
  "serde",
