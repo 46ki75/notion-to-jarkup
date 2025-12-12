@@ -85,11 +85,29 @@ impl Client {
                     }
                 }
                 notionrs_types::object::block::Block::BulletedListItem { bulleted_list_item } => {
+                    let inline_components: Vec<jarkup_rs::Component> = self
+                        .convert_rich_text(bulleted_list_item.rich_text)
+                        .await?
+                        .into_iter()
+                        .map(jarkup_rs::Component::InlineComponent)
+                        .collect();
+
+                    let children_components = if block.has_children {
+                        self.convert_block(&block.id).await?
+                    } else {
+                        vec![]
+                    };
+
+                    let merged_components = inline_components
+                        .into_iter()
+                        .chain(children_components)
+                        .collect::<Vec<jarkup_rs::Component>>();
+
                     let list_item_component = jarkup_rs::ListItem {
                         id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
-                            default: self.convert_rich_text(bulleted_list_item.rich_text).await?,
+                            default: merged_components,
                         },
                     };
 
@@ -380,11 +398,29 @@ impl Client {
                     }
                 }
                 notionrs_types::object::block::Block::NumberedListItem { numbered_list_item } => {
+                    let inline_components: Vec<jarkup_rs::Component> = self
+                        .convert_rich_text(numbered_list_item.rich_text)
+                        .await?
+                        .into_iter()
+                        .map(jarkup_rs::Component::InlineComponent)
+                        .collect();
+
+                    let children_components = if block.has_children {
+                        self.convert_block(&block.id).await?
+                    } else {
+                        vec![]
+                    };
+
+                    let merged_components = inline_components
+                        .into_iter()
+                        .chain(children_components)
+                        .collect::<Vec<jarkup_rs::Component>>();
+
                     let list_item_component = jarkup_rs::ListItem {
                         id: Some(block.id),
                         props: None,
                         slots: jarkup_rs::ListItemSlots {
-                            default: self.convert_rich_text(numbered_list_item.rich_text).await?,
+                            default: merged_components,
                         },
                     };
 
