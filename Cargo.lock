@@ -81,9 +81,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.10.1"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d71b6127be86fdcfddb610f7182ac57211d4b18a3e9c82eb2d17662f2227ad6a"
+checksum = "b35204fbdc0b3f4446b89fc1ac2cf84a8a68971995d0bf2e925ec7cd960f9cb3"
 
 [[package]]
 name = "cc"
@@ -837,9 +837,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs"
-version = "0.4.2"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "faa66be3046f1788569ecc11541b1c83a7b9a618fb21715b2e49472a59608160"
+checksum = "9bec585e7b9e3eeea9e1c5625b6a915e86b93f19ea57c74ebdc8fc40d12b2b24"
 dependencies = [
  "async-trait",
  "bytes",
@@ -850,6 +850,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_plain",
+ "serde_urlencoded",
  "thiserror",
  "time",
 ]
@@ -867,9 +868,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs_types"
-version = "0.4.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "734059511cba2fe259886e5d69dbf415274f9af387b0d18f457f3a3b563299d8"
+checksum = "4ff8fb20fd8d5e392dd1784b5fa3501e5210a49435f37d6967b4c26dc0dda5dd"
 dependencies = [
  "notionrs_macro",
  "serde",
