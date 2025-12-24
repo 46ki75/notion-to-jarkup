@@ -23,3 +23,7 @@ updates:
       - "46ki75"
     reviewers:
       - "46ki75"
+    groups:
+      notionrs-updates:
+        patterns:
+          - "*notionrs*"
