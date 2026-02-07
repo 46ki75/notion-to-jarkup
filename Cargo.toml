@@ -16,10 +16,12 @@ async-recursion = "^1.1"
 futures = "0.3.31"
 html-meta-scraper = "^0.2"
 jarkup-rs = "^0.6.0"
-notionrs = "0.8.0"
-notionrs_types = "0.6.0"
-reqwest = { version = "0.12.28", default-features = false, features = [
-    "rustls-tls",
+notionrs = "0.9.0"
+notionrs_types = "0.7.0"
+reqwest = { version = "0.13", default-features = false, features = [
+    "rustls",
+    "http2",
+    "gzip",
 ] }
 thiserror = "2"
 url = "2.5"
