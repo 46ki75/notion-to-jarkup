@@ -282,8 +282,32 @@ impl Client {
 
                     components.push(component);
                 }
-                notionrs_types::object::block::Block::ColumnList { column_list: _ } => continue,
-                notionrs_types::object::block::Block::Column { column: _ } => continue,
+                notionrs_types::object::block::Block::ColumnList { .. } => {
+                    let columns = self.convert_block(&block.id).await?;
+
+                    let component = jarkup_rs::ColumnList {
+                        id: Some(block.id),
+                        props: None,
+                        slots: jarkup_rs::ColumnListSlots { default: columns },
+                    };
+
+                    components.push(component.into());
+                }
+                notionrs_types::object::block::Block::Column { column } => {
+                    let column_children = self.convert_block(&block.id).await?;
+
+                    let component = jarkup_rs::Column {
+                        id: Some(block.id),
+                        props: Some(jarkup_rs::ColumnProps {
+                            width_ratio: Some(column.width_ratio as f32),
+                        }),
+                        slots: jarkup_rs::ColumnSlots {
+                            default: column_children,
+                        },
+                    };
+
+                    components.push(component.into());
+                }
                 notionrs_types::object::block::Block::Divider { divider: _ } => {
                     let component = jarkup_rs::Divider {
                         id: Some(block.id),
