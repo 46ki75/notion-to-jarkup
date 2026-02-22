@@ -1,6 +1,6 @@
 [package]
 name = "notion-to-jarkup"
-version = "0.12.0"
+version = "0.13.0"
 edition = "2024"
 description = "Convert Notion blocks into jarkup JSON."
 authors = ["Chomolungma Shirayuki"]
