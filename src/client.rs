@@ -42,15 +42,16 @@ impl Client {
             .await?;
 
         // Collect blocks that have children
-        let blocks_needing_children: Vec<&BlockResponse> = blocks
-            .iter()
-            .filter(|b| b.has_children)
-            .collect();
+        let blocks_needing_children: Vec<&BlockResponse> =
+            blocks.iter().filter(|b| b.has_children).collect();
 
         // Fetch all children concurrently
         let child_results = try_join_all(
-            blocks_needing_children.iter().map(|b| self.convert_block(&b.id))
-        ).await?;
+            blocks_needing_children
+                .iter()
+                .map(|b| self.convert_block(&b.id)),
+        )
+        .await?;
 
         // Build a lookup map: block_id -> children components
         let mut children_cache: HashMap<String, Vec<jarkup_rs::Component>> =
@@ -371,7 +372,12 @@ impl Client {
                 notionrs_types::object::block::Block::Heading1 { heading_1 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
-                        .convert_heading_block(heading_1, &block.id, jarkup_rs::HeadingLevel::H1, children)
+                        .convert_heading_block(
+                            heading_1,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H1,
+                            children,
+                        )
                         .await?;
 
                     if let Some(c) = component {
@@ -383,7 +389,12 @@ impl Client {
                 notionrs_types::object::block::Block::Heading2 { heading_2 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
-                        .convert_heading_block(heading_2, &block.id, jarkup_rs::HeadingLevel::H2, children)
+                        .convert_heading_block(
+                            heading_2,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H2,
+                            children,
+                        )
                         .await?;
 
                     if let Some(c) = component {
@@ -395,7 +406,12 @@ impl Client {
                 notionrs_types::object::block::Block::Heading3 { heading_3 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
-                        .convert_heading_block(heading_3, &block.id, jarkup_rs::HeadingLevel::H3, children)
+                        .convert_heading_block(
+                            heading_3,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H3,
+                            children,
+                        )
                         .await?;
 
                     if let Some(c) = component {
@@ -532,7 +548,8 @@ impl Client {
                             None
                         };
 
-                    let maybe_children_components = children_cache.remove(&block.id).unwrap_or_default();
+                    let maybe_children_components =
+                        children_cache.remove(&block.id).unwrap_or_default();
 
                     let merged_components = maybe_paragraph_component
                         .into_iter()
@@ -560,7 +577,8 @@ impl Client {
                     table_of_contents: _,
                 } => continue,
                 notionrs_types::object::block::Block::Table { table } => {
-                    let mut all_children_rows = children_cache.remove(&block.id).unwrap_or_default();
+                    let mut all_children_rows =
+                        children_cache.remove(&block.id).unwrap_or_default();
 
                     let maybe_header_row =
                         if table.has_column_header && all_children_rows.len() > 0 {
