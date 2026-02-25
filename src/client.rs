@@ -15,6 +15,38 @@ pub struct Client {
 }
 
 impl Client {
+    fn map_color(color: Color) -> Option<String> {
+        match color {
+            notionrs_types::object::color::Color::Default => None,
+            notionrs_types::object::color::Color::Blue => Some(String::from("#6987b8")),
+            notionrs_types::object::color::Color::Brown => Some(String::from("#8b4c3f")),
+            notionrs_types::object::color::Color::Gray => Some(String::from("#868e9c")),
+            notionrs_types::object::color::Color::Green => Some(String::from("#59b57c")),
+            notionrs_types::object::color::Color::Orange => Some(String::from("#bf7e71")),
+            notionrs_types::object::color::Color::Pink => Some(String::from("#c9699e")),
+            notionrs_types::object::color::Color::Purple => Some(String::from("#9771bd")),
+            notionrs_types::object::color::Color::Red => Some(String::from("#b36472")),
+            notionrs_types::object::color::Color::Yellow => Some(String::from("#b8a36e")),
+            _ => None,
+        }
+    }
+
+    fn map_background_color(background_color: Color) -> Option<String> {
+        match background_color {
+            notionrs_types::object::color::Color::Default => None,
+            notionrs_types::object::color::Color::BlueBackground => Some(String::from("#c0cce1")),
+            notionrs_types::object::color::Color::BrownBackground => Some(String::from("#d0bdac")),
+            notionrs_types::object::color::Color::GrayBackground => Some(String::from("#cccfd5")),
+            notionrs_types::object::color::Color::GreenBackground => Some(String::from("#b1dcc2")),
+            notionrs_types::object::color::Color::OrangeBackground => Some(String::from("#f1dbd2")),
+            notionrs_types::object::color::Color::PinkBackground => Some(String::from("#ebc7db")),
+            notionrs_types::object::color::Color::PurpleBackground => Some(String::from("#d7c8e5")),
+            notionrs_types::object::color::Color::RedBackground => Some(String::from("#e8c2c2")),
+            notionrs_types::object::color::Color::YellowBackground => Some(String::from("#f0e9d7")),
+            _ => None,
+        }
+    }
+
     fn create_unsupported_component(&self, block_name: &str) -> jarkup_rs::Component {
         jarkup_rs::Unsupported {
             id: None,
@@ -42,15 +74,16 @@ impl Client {
             .await?;
 
         // Collect blocks that have children
-        let blocks_needing_children: Vec<&BlockResponse> = blocks
-            .iter()
-            .filter(|b| b.has_children)
-            .collect();
+        let blocks_needing_children: Vec<&BlockResponse> =
+            blocks.iter().filter(|b| b.has_children).collect();
 
         // Fetch all children concurrently
         let child_results = try_join_all(
-            blocks_needing_children.iter().map(|b| self.convert_block(&b.id))
-        ).await?;
+            blocks_needing_children
+                .iter()
+                .map(|b| self.convert_block(&b.id)),
+        )
+        .await?;
 
         // Build a lookup map: block_id -> children components
         let mut children_cache: HashMap<String, Vec<jarkup_rs::Component>> =
@@ -371,7 +404,12 @@ impl Client {
                 notionrs_types::object::block::Block::Heading1 { heading_1 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
-                        .convert_heading_block(heading_1, &block.id, jarkup_rs::HeadingLevel::H1, children)
+                        .convert_heading_block(
+                            heading_1,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H1,
+                            children,
+                        )
                         .await?;
 
                     if let Some(c) = component {
@@ -383,7 +421,12 @@ impl Client {
                 notionrs_types::object::block::Block::Heading2 { heading_2 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
-                        .convert_heading_block(heading_2, &block.id, jarkup_rs::HeadingLevel::H2, children)
+                        .convert_heading_block(
+                            heading_2,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H2,
+                            children,
+                        )
                         .await?;
 
                     if let Some(c) = component {
@@ -395,7 +438,12 @@ impl Client {
                 notionrs_types::object::block::Block::Heading3 { heading_3 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
-                        .convert_heading_block(heading_3, &block.id, jarkup_rs::HeadingLevel::H3, children)
+                        .convert_heading_block(
+                            heading_3,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H3,
+                            children,
+                        )
                         .await?;
 
                     if let Some(c) = component {
@@ -508,7 +556,10 @@ impl Client {
                 notionrs_types::object::block::Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
                         id: Some(block.id),
-                        props: None,
+                        props: Some(jarkup_rs::ParagraphProps {
+                            color: Self::map_color(paragraph.color),
+                            background_color: Self::map_background_color(paragraph.color),
+                        }),
                         slots: jarkup_rs::ParagraphSlots {
                             default: self.convert_rich_text(paragraph.rich_text).await?,
                         },
@@ -532,7 +583,8 @@ impl Client {
                             None
                         };
 
-                    let maybe_children_components = children_cache.remove(&block.id).unwrap_or_default();
+                    let maybe_children_components =
+                        children_cache.remove(&block.id).unwrap_or_default();
 
                     let merged_components = maybe_paragraph_component
                         .into_iter()
@@ -560,7 +612,8 @@ impl Client {
                     table_of_contents: _,
                 } => continue,
                 notionrs_types::object::block::Block::Table { table } => {
-                    let mut all_children_rows = children_cache.remove(&block.id).unwrap_or_default();
+                    let mut all_children_rows =
+                        children_cache.remove(&block.id).unwrap_or_default();
 
                     let maybe_header_row =
                         if table.has_column_header && all_children_rows.len() > 0 {
@@ -730,68 +783,8 @@ impl Client {
                             id: None,
                             props: jarkup_rs::TextProps {
                                 text: plain_text,
-                                color: match annotations.color {
-                                    notionrs_types::object::color::Color::Default => None,
-                                    notionrs_types::object::color::Color::Blue => {
-                                        Some(String::from("#6987b8"))
-                                    }
-                                    notionrs_types::object::color::Color::Brown => {
-                                        Some(String::from("#8b4c3f"))
-                                    }
-                                    notionrs_types::object::color::Color::Gray => {
-                                        Some(String::from("#868e9c"))
-                                    }
-                                    notionrs_types::object::color::Color::Green => {
-                                        Some(String::from("#59b57c"))
-                                    }
-                                    notionrs_types::object::color::Color::Orange => {
-                                        Some(String::from("#bf7e71"))
-                                    }
-                                    notionrs_types::object::color::Color::Pink => {
-                                        Some(String::from("#c9699e"))
-                                    }
-                                    notionrs_types::object::color::Color::Purple => {
-                                        Some(String::from("#9771bd"))
-                                    }
-                                    notionrs_types::object::color::Color::Red => {
-                                        Some(String::from("#b36472"))
-                                    }
-                                    notionrs_types::object::color::Color::Yellow => {
-                                        Some(String::from("#b8a36e"))
-                                    }
-                                    _ => None,
-                                },
-                                background_color: match annotations.color {
-                                    notionrs_types::object::color::Color::Default => None,
-                                    notionrs_types::object::color::Color::BlueBackground => {
-                                        Some(String::from("#6987b8"))
-                                    }
-                                    notionrs_types::object::color::Color::BrownBackground => {
-                                        Some(String::from("#8b4c3f"))
-                                    }
-                                    notionrs_types::object::color::Color::GrayBackground => {
-                                        Some(String::from("#868e9c"))
-                                    }
-                                    notionrs_types::object::color::Color::GreenBackground => {
-                                        Some(String::from("#59b57c"))
-                                    }
-                                    notionrs_types::object::color::Color::OrangeBackground => {
-                                        Some(String::from("#bf7e71"))
-                                    }
-                                    notionrs_types::object::color::Color::PinkBackground => {
-                                        Some(String::from("#c9699e"))
-                                    }
-                                    notionrs_types::object::color::Color::PurpleBackground => {
-                                        Some(String::from("#9771bd"))
-                                    }
-                                    notionrs_types::object::color::Color::RedBackground => {
-                                        Some(String::from("#b36472"))
-                                    }
-                                    notionrs_types::object::color::Color::YellowBackground => {
-                                        Some(String::from("#b8a36e"))
-                                    }
-                                    _ => None,
-                                },
+                                color: Self::map_color(annotations.color),
+                                background_color: Self::map_background_color(annotations.color),
                                 bold: Some(annotations.bold),
                                 italic: Some(annotations.italic),
                                 underline: Some(annotations.underline),
