@@ -741,7 +741,7 @@ impl Client {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::Unsupported => {
+                _ => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Unsupported"));
                     } else {
