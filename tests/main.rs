@@ -11,6 +11,7 @@ async fn convert() -> Result<(), Box<dyn std::error::Error>> {
         notionrs_client,
         reqwest_client,
         enable_unsupported_block: true,
+        enable_fetch_image_size: true,
     };
 
     let result = client.convert_block(&block_id).await?;

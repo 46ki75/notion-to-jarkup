@@ -12,6 +12,8 @@ pub struct Client {
     /// If true, unsupported blocks will be rendered as `Unsupported` blocks.
     /// If false, unsupported blocks will be skipped.
     pub enable_unsupported_block: bool,
+
+    pub enable_fetch_image_size: bool,
 }
 
 impl Client {
@@ -58,7 +60,6 @@ impl Client {
         .into()
     }
 
-    #[async_recursion::async_recursion]
     pub async fn convert_block(
         &self,
         block_id: &str,
@@ -467,11 +468,34 @@ impl Client {
                         _ => Some(String::from("untitled")),
                     };
 
+                    let (width, height) = if self.enable_fetch_image_size {
+                        let image_bytes = self
+                            .reqwest_client
+                            .get(image.get_url())
+                            .header("User-Agent", "notion-to-jarkup")
+                            .send()
+                            .await?
+                            .bytes()
+                            .await?;
+
+                        let info = image::ImageReader::new(std::io::Cursor::new(image_bytes))
+                            .with_guessed_format()
+                            .ok()
+                            .and_then(|reader| reader.into_dimensions().ok())
+                            .map_or((None, None), |(x, y)| (Some(x), Some(y)));
+
+                        info
+                    } else {
+                        (None, None)
+                    };
+
                     let component = jarkup_rs::Image {
                         id: Some(block.id),
                         props: jarkup_rs::ImageProps {
                             src: image.get_url(),
                             alt: maybe_caption,
+                            width,
+                            height,
                             ..Default::default()
                         },
                         slots: None,
@@ -742,9 +766,21 @@ impl Client {
                         continue;
                     }
                 }
+
+                notionrs_types::object::block::Block::Unsupported { unsupported } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component(&format!(
+                            "UnsupportedBlock: {}",
+                            unsupported.block_type
+                        )));
+                    } else {
+                        continue;
+                    }
+                }
+
                 _ => {
                     if self.enable_unsupported_block {
-                        components.push(self.create_unsupported_component("Unsupported"));
+                        components.push(self.create_unsupported_component("Unknown"));
                     } else {
                         continue;
                     }
