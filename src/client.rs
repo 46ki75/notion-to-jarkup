@@ -741,9 +741,21 @@ impl Client {
                         continue;
                     }
                 }
+
+                notionrs_types::object::block::Block::Unsupported { unsupported } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component(&format!(
+                            "UnsupportedBlock: {}",
+                            unsupported.block_type
+                        )));
+                    } else {
+                        continue;
+                    }
+                }
+
                 _ => {
                     if self.enable_unsupported_block {
-                        components.push(self.create_unsupported_component("Unsupported"));
+                        components.push(self.create_unsupported_component("Unknown"));
                     } else {
                         continue;
                     }
