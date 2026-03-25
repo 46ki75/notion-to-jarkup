@@ -58,7 +58,6 @@ impl Client {
         .into()
     }
 
-    #[async_recursion::async_recursion]
     pub async fn convert_block(
         &self,
         block_id: &str,
