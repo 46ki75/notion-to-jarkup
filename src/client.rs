@@ -472,6 +472,7 @@ impl Client {
                         props: jarkup_rs::ImageProps {
                             src: image.get_url(),
                             alt: maybe_caption,
+                            ..Default::default()
                         },
                         slots: None,
                     };
