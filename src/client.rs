@@ -583,18 +583,30 @@ impl Client {
                     let children_cache = children_cache.remove(&block.id);
 
                     let component = jarkup_rs::Paragraph {
-                        id: Some(block.id),
+                        id: Some(block.id.clone()),
                         props: Some(jarkup_rs::ParagraphProps {
                             color: Self::map_color(paragraph.color),
                             background_color: Self::map_background_color(paragraph.color),
                         }),
                         slots: jarkup_rs::ParagraphSlots {
                             default: self.convert_rich_text(paragraph.rich_text).await?,
-                            children: children_cache,
                         },
                     };
 
-                    components.push(component.into());
+                    if let Some(children_cache) = children_cache {
+                        let tab_component = jarkup_rs::Tab {
+                            id: Some(block.id),
+                            props: None,
+                            slots: jarkup_rs::TabSlots {
+                                labels: component.slots.default.clone(),
+                                contents: children_cache,
+                            },
+                        };
+
+                        components.push(tab_component.into());
+                    } else {
+                        components.push(component.into());
+                    };
                 }
                 notionrs_types::object::block::Block::Pdf { pdf: _ } => {}
                 notionrs_types::object::block::Block::Quote { quote } => {
@@ -650,17 +662,10 @@ impl Client {
                         .into_iter()
                         .filter_map(|c| {
                             if let jarkup_rs::Component::BlockComponent(
-                                jarkup_rs::BlockComponent::Paragraph(paragraph),
+                                jarkup_rs::BlockComponent::Tab(tab),
                             ) = c
                             {
-                                Some(jarkup_rs::Tab {
-                                    id: paragraph.id,
-                                    props: None,
-                                    slots: jarkup_rs::TabSlots {
-                                        labels: paragraph.slots.default,
-                                        contents: paragraph.slots.children.unwrap_or_default(),
-                                    },
-                                })
+                                Some(tab)
                             } else {
                                 None
                             }
