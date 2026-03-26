@@ -1,6 +1,6 @@
 [package]
 name = "notion-to-jarkup"
-version = "0.17.0"
+version = "0.18.0"
 edition = "2024"
 description = "Convert Notion blocks into jarkup JSON."
 authors = ["Chomolungma Shirayuki"]
@@ -15,9 +15,9 @@ readme = "./README.md"
 futures = "0.3.32"
 html-meta-scraper = "^0.2"
 image = "0.25.10"
-jarkup-rs = "^0.9.2"
-notionrs = "0.12.0"
-notionrs_types = "0.10.0"
+jarkup-rs = "^0.12.1"
+notionrs = "0.13.0"
+notionrs_types = "0.11.0"
 reqwest = { version = "0.13", default-features = false, features = [
     "rustls",
     "http2",

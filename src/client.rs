@@ -216,6 +216,7 @@ impl Client {
                                     props: None,
                                     slots: jarkup_rs::ParagraphSlots {
                                         default: self.convert_rich_text(callout.rich_text).await?,
+                                        ..Default::default()
                                     },
                                 }
                                 .into(),
@@ -580,7 +581,7 @@ impl Client {
                 }
                 notionrs_types::object::block::Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
-                        id: Some(block.id),
+                        id: Some(block.id.clone()),
                         props: Some(jarkup_rs::ParagraphProps {
                             color: Self::map_color(paragraph.color),
                             background_color: Self::map_background_color(paragraph.color),
@@ -590,7 +591,23 @@ impl Client {
                         },
                     };
 
-                    components.push(component.into());
+                    // If there are children blocks, their parent block is `Tabs`.
+                    // In that case, we need to render the children blocks as the content of the `Tab` block.
+                    let children_cache = children_cache.remove(&block.id);
+                    if let Some(children_cache) = children_cache {
+                        let tab_component = jarkup_rs::Tab {
+                            id: Some(block.id),
+                            props: None,
+                            slots: jarkup_rs::TabSlots {
+                                labels: component.slots.default.clone(),
+                                contents: children_cache,
+                            },
+                        };
+
+                        components.push(tab_component.into());
+                    } else {
+                        components.push(component.into());
+                    };
                 }
                 notionrs_types::object::block::Block::Pdf { pdf: _ } => {}
                 notionrs_types::object::block::Block::Quote { quote } => {
@@ -601,6 +618,7 @@ impl Client {
                                 props: None,
                                 slots: jarkup_rs::ParagraphSlots {
                                     default: self.convert_rich_text(quote.rich_text).await?,
+                                    ..Default::default()
                                 },
                             };
                             Some(paragraph.into())
@@ -636,6 +654,36 @@ impl Client {
                 notionrs_types::object::block::Block::TableOfContents {
                     table_of_contents: _,
                 } => continue,
+
+                notionrs_types::object::block::Block::Tab { .. } => {
+                    let maybe_paragraph_blocks =
+                        children_cache.remove(&block.id).unwrap_or_default();
+
+                    let tab_components = maybe_paragraph_blocks
+                        .into_iter()
+                        .filter_map(|c| {
+                            if let jarkup_rs::Component::BlockComponent(
+                                jarkup_rs::BlockComponent::Tab(tab),
+                            ) = c
+                            {
+                                Some(tab)
+                            } else {
+                                None
+                            }
+                        })
+                        .collect::<Vec<_>>();
+
+                    let tabs_component = jarkup_rs::Tabs {
+                        id: Some(block.id),
+                        props: None,
+                        slots: jarkup_rs::TabsSlots {
+                            default: tab_components.into_iter().map(|t| t.into()).collect(),
+                        },
+                    };
+
+                    components.push(tabs_component.into());
+                }
+
                 notionrs_types::object::block::Block::Table { table } => {
                     let mut all_children_rows =
                         children_cache.remove(&block.id).unwrap_or_default();
