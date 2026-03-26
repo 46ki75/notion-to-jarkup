@@ -580,8 +580,6 @@ impl Client {
                     components.push(component.into());
                 }
                 notionrs_types::object::block::Block::Paragraph { paragraph } => {
-                    let children_cache = children_cache.remove(&block.id);
-
                     let component = jarkup_rs::Paragraph {
                         id: Some(block.id.clone()),
                         props: Some(jarkup_rs::ParagraphProps {
@@ -593,6 +591,9 @@ impl Client {
                         },
                     };
 
+                    // If there are children blocks, their parent block is `Tabs`.
+                    // In that case, we need to render the children blocks as the content of the `Tab` block.
+                    let children_cache = children_cache.remove(&block.id);
                     if let Some(children_cache) = children_cache {
                         let tab_component = jarkup_rs::Tab {
                             id: Some(block.id),
