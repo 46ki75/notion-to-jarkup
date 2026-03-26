@@ -216,6 +216,7 @@ impl Client {
                                     props: None,
                                     slots: jarkup_rs::ParagraphSlots {
                                         default: self.convert_rich_text(callout.rich_text).await?,
+                                        ..Default::default()
                                     },
                                 }
                                 .into(),
@@ -579,6 +580,8 @@ impl Client {
                     components.push(component.into());
                 }
                 notionrs_types::object::block::Block::Paragraph { paragraph } => {
+                    let children_cache = children_cache.remove(&block.id);
+
                     let component = jarkup_rs::Paragraph {
                         id: Some(block.id),
                         props: Some(jarkup_rs::ParagraphProps {
@@ -587,6 +590,7 @@ impl Client {
                         }),
                         slots: jarkup_rs::ParagraphSlots {
                             default: self.convert_rich_text(paragraph.rich_text).await?,
+                            children: children_cache,
                         },
                     };
 
@@ -601,6 +605,7 @@ impl Client {
                                 props: None,
                                 slots: jarkup_rs::ParagraphSlots {
                                     default: self.convert_rich_text(quote.rich_text).await?,
+                                    ..Default::default()
                                 },
                             };
                             Some(paragraph.into())
@@ -636,6 +641,43 @@ impl Client {
                 notionrs_types::object::block::Block::TableOfContents {
                     table_of_contents: _,
                 } => continue,
+
+                notionrs_types::object::block::Block::Tab { .. } => {
+                    let maybe_paragraph_blocks =
+                        children_cache.remove(&block.id).unwrap_or_default();
+
+                    let tab_components = maybe_paragraph_blocks
+                        .into_iter()
+                        .filter_map(|c| {
+                            if let jarkup_rs::Component::BlockComponent(
+                                jarkup_rs::BlockComponent::Paragraph(paragraph),
+                            ) = c
+                            {
+                                Some(jarkup_rs::Tab {
+                                    id: paragraph.id,
+                                    props: None,
+                                    slots: jarkup_rs::TabSlots {
+                                        labels: paragraph.slots.default,
+                                        contents: paragraph.slots.children.unwrap_or_default(),
+                                    },
+                                })
+                            } else {
+                                None
+                            }
+                        })
+                        .collect::<Vec<_>>();
+
+                    let tabs_component = jarkup_rs::Tabs {
+                        id: Some(block.id),
+                        props: None,
+                        slots: jarkup_rs::TabsSlots {
+                            default: tab_components.into_iter().map(|t| t.into()).collect(),
+                        },
+                    };
+
+                    components.push(tabs_component.into());
+                }
+
                 notionrs_types::object::block::Block::Table { table } => {
                     let mut all_children_rows =
                         children_cache.remove(&block.id).unwrap_or_default();
