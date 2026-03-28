@@ -13,7 +13,7 @@ pub struct Client {
     /// If false, unsupported blocks will be skipped.
     pub enable_unsupported_block: bool,
 
-    pub enable_fetch_image_size: bool,
+    pub enable_fetch_image_meta: bool,
 }
 
 impl Client {
@@ -469,7 +469,7 @@ impl Client {
                         _ => Some(String::from("untitled")),
                     };
 
-                    let (width, height) = if self.enable_fetch_image_size {
+                    let (width, height, mime_type) = if self.enable_fetch_image_meta {
                         let image_bytes = self
                             .reqwest_client
                             .get(image.get_url())
@@ -479,15 +479,17 @@ impl Client {
                             .bytes()
                             .await?;
 
+                        let mime_type = infer::get(&image_bytes).map(|t| t.to_string());
+
                         let info = image::ImageReader::new(std::io::Cursor::new(image_bytes))
                             .with_guessed_format()
                             .ok()
                             .and_then(|reader| reader.into_dimensions().ok())
                             .map_or((None, None), |(x, y)| (Some(x), Some(y)));
 
-                        info
+                        (info.0, info.1, mime_type)
                     } else {
-                        (None, None)
+                        (None, None, None)
                     };
 
                     let component = jarkup_rs::Image {
@@ -497,6 +499,7 @@ impl Client {
                             alt: maybe_caption,
                             width,
                             height,
+                            mime_type,
                             ..Default::default()
                         },
                         slots: None,
