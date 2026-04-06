@@ -1314,7 +1314,7 @@ checksum = "0676bb32a98c1a483ce53e500a81ad9c3d5b3f7c920c28c24e9cb0980d0b5bc8"
 
 [[package]]
 name = "notion-to-jarkup"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "dotenvy",
  "futures",
@@ -1333,9 +1333,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs"
-version = "0.13.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "011690a0874fca522ac4d5703deb19cbd1a655c90bfeabf358eaa2e5bd916aa0"
+checksum = "86911383344ec2c8e5cdab1740761efe1edab7c9b7c2dda82c275b0f5adc3483"
 dependencies = [
  "bytes",
  "futures",
