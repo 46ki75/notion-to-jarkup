@@ -1333,9 +1333,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs"
-version = "0.14.0"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86911383344ec2c8e5cdab1740761efe1edab7c9b7c2dda82c275b0f5adc3483"
+checksum = "29b724e6a02838c449ca0d124ca2e96a32543bfbfa2b3ddcdb1b99da62fa0f55"
 dependencies = [
  "bytes",
  "futures",
@@ -1363,12 +1363,13 @@ dependencies = [
 
 [[package]]
 name = "notionrs_types"
-version = "0.11.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9f706dd474fbced8d43186510d077839c30c77ca8967a9c1c35b314797c8227"
+checksum = "14ab308e196dd37766dff72d45aea33ddcaf39744589bf50e427bee57c0252ca"
 dependencies = [
  "notionrs_macro",
  "serde",
+ "serde_json",
  "serde_plain",
  "time",
 ]
