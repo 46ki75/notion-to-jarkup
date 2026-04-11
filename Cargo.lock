@@ -1323,7 +1323,6 @@ dependencies = [
  "infer",
  "jarkup-rs",
  "notionrs",
- "notionrs_types",
  "reqwest",
  "serde_json",
  "thiserror 2.0.18",
@@ -1333,9 +1332,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs"
-version = "0.14.0"
+version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86911383344ec2c8e5cdab1740761efe1edab7c9b7c2dda82c275b0f5adc3483"
+checksum = "08b50dbba98a4f1a53e4c9a8efdbe06c78df7cffcb7d9f8d78fe4b2d51a9e1a3"
 dependencies = [
  "bytes",
  "futures",
@@ -1363,12 +1362,13 @@ dependencies = [
 
 [[package]]
 name = "notionrs_types"
-version = "0.11.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9f706dd474fbced8d43186510d077839c30c77ca8967a9c1c35b314797c8227"
+checksum = "9e914ac6ad525f0969ee0ab716ef9028577139747a40b492e2f80e4ed49775da"
 dependencies = [
  "notionrs_macro",
  "serde",
+ "serde_json",
  "serde_plain",
  "time",
 ]
