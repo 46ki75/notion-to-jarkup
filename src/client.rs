@@ -1,7 +1,6 @@
 use futures::TryStreamExt;
 use futures::future::try_join_all;
-use notionrs::PaginateExt;
-use notionrs_types::prelude::*;
+use notionrs::{PaginateExt, types::prelude::*};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -19,32 +18,32 @@ pub struct Client {
 impl Client {
     fn map_color(color: Color) -> Option<String> {
         match color {
-            notionrs_types::object::color::Color::Default => None,
-            notionrs_types::object::color::Color::Blue => Some(String::from("#6987b8")),
-            notionrs_types::object::color::Color::Brown => Some(String::from("#8b4c3f")),
-            notionrs_types::object::color::Color::Gray => Some(String::from("#868e9c")),
-            notionrs_types::object::color::Color::Green => Some(String::from("#59b57c")),
-            notionrs_types::object::color::Color::Orange => Some(String::from("#bf7e71")),
-            notionrs_types::object::color::Color::Pink => Some(String::from("#c9699e")),
-            notionrs_types::object::color::Color::Purple => Some(String::from("#9771bd")),
-            notionrs_types::object::color::Color::Red => Some(String::from("#b36472")),
-            notionrs_types::object::color::Color::Yellow => Some(String::from("#b8a36e")),
+            Color::Default => None,
+            Color::Blue => Some(String::from("#6987b8")),
+            Color::Brown => Some(String::from("#8b4c3f")),
+            Color::Gray => Some(String::from("#868e9c")),
+            Color::Green => Some(String::from("#59b57c")),
+            Color::Orange => Some(String::from("#bf7e71")),
+            Color::Pink => Some(String::from("#c9699e")),
+            Color::Purple => Some(String::from("#9771bd")),
+            Color::Red => Some(String::from("#b36472")),
+            Color::Yellow => Some(String::from("#b8a36e")),
             _ => None,
         }
     }
 
     fn map_background_color(background_color: Color) -> Option<String> {
         match background_color {
-            notionrs_types::object::color::Color::Default => None,
-            notionrs_types::object::color::Color::BlueBackground => Some(String::from("#c0cce1")),
-            notionrs_types::object::color::Color::BrownBackground => Some(String::from("#d0bdac")),
-            notionrs_types::object::color::Color::GrayBackground => Some(String::from("#cccfd5")),
-            notionrs_types::object::color::Color::GreenBackground => Some(String::from("#b1dcc2")),
-            notionrs_types::object::color::Color::OrangeBackground => Some(String::from("#f1dbd2")),
-            notionrs_types::object::color::Color::PinkBackground => Some(String::from("#ebc7db")),
-            notionrs_types::object::color::Color::PurpleBackground => Some(String::from("#d7c8e5")),
-            notionrs_types::object::color::Color::RedBackground => Some(String::from("#e8c2c2")),
-            notionrs_types::object::color::Color::YellowBackground => Some(String::from("#f0e9d7")),
+            Color::Default => None,
+            Color::BlueBackground => Some(String::from("#c0cce1")),
+            Color::BrownBackground => Some(String::from("#d0bdac")),
+            Color::GrayBackground => Some(String::from("#cccfd5")),
+            Color::GreenBackground => Some(String::from("#b1dcc2")),
+            Color::OrangeBackground => Some(String::from("#f1dbd2")),
+            Color::PinkBackground => Some(String::from("#ebc7db")),
+            Color::PurpleBackground => Some(String::from("#d7c8e5")),
+            Color::RedBackground => Some(String::from("#e8c2c2")),
+            Color::YellowBackground => Some(String::from("#f0e9d7")),
             _ => None,
         }
     }
@@ -96,14 +95,14 @@ impl Client {
 
         for block in blocks {
             match block.block {
-                notionrs_types::object::block::Block::Audio { audio: _ } => {
+                Block::Audio { audio: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Audio"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::Bookmark { bookmark } => {
+                Block::Bookmark { bookmark } => {
                     let html = self
                         .reqwest_client
                         .get(&bookmark.url)
@@ -132,14 +131,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Breadcrumb { breadcrumb: _ } => {
+                Block::Breadcrumb { breadcrumb: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Breadcrumb"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::BulletedListItem { bulleted_list_item } => {
+                Block::BulletedListItem { bulleted_list_item } => {
                     let inline_components: Vec<jarkup_rs::Component> = self
                         .convert_rich_text(bulleted_list_item.rich_text)
                         .await?
@@ -207,7 +206,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Callout { callout } => {
+                Block::Callout { callout } => {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if callout.rich_text.len() > 0 {
                             Some(
@@ -236,36 +235,28 @@ impl Client {
                         id: Some(block.id),
                         props: Some(jarkup_rs::CalloutProps {
                             r#type: Some(match callout.color {
-                                notionrs_types::object::color::Color::Default
-                                | notionrs_types::object::color::Color::DefaultBackground
-                                | notionrs_types::object::color::Color::Blue
-                                | notionrs_types::object::color::Color::BlueBackground
-                                | notionrs_types::object::color::Color::Gray
-                                | notionrs_types::object::color::Color::GrayBackground => {
-                                    jarkup_rs::CalloutType::Note
-                                }
-                                notionrs_types::object::color::Color::Green
-                                | notionrs_types::object::color::Color::GreenBackground => {
+                                Color::Default
+                                | Color::DefaultBackground
+                                | Color::Blue
+                                | Color::BlueBackground
+                                | Color::Gray
+                                | Color::GrayBackground => jarkup_rs::CalloutType::Note,
+                                Color::Green | Color::GreenBackground => {
                                     jarkup_rs::CalloutType::Tip
                                 }
-                                notionrs_types::object::color::Color::Purple
-                                | notionrs_types::object::color::Color::PurpleBackground => {
+                                Color::Purple | Color::PurpleBackground => {
                                     jarkup_rs::CalloutType::Important
                                 }
-                                notionrs_types::object::color::Color::Yellow
-                                | notionrs_types::object::color::Color::YellowBackground
-                                | notionrs_types::object::color::Color::Orange
-                                | notionrs_types::object::color::Color::OrangeBackground
-                                | notionrs_types::object::color::Color::Brown
-                                | notionrs_types::object::color::Color::BrownBackground => {
-                                    jarkup_rs::CalloutType::Warning
-                                }
-                                notionrs_types::object::color::Color::Red
-                                | notionrs_types::object::color::Color::RedBackground
-                                | notionrs_types::object::color::Color::Pink
-                                | notionrs_types::object::color::Color::PinkBackground => {
-                                    jarkup_rs::CalloutType::Caution
-                                }
+                                Color::Yellow
+                                | Color::YellowBackground
+                                | Color::Orange
+                                | Color::OrangeBackground
+                                | Color::Brown
+                                | Color::BrownBackground => jarkup_rs::CalloutType::Warning,
+                                Color::Red
+                                | Color::RedBackground
+                                | Color::Pink
+                                | Color::PinkBackground => jarkup_rs::CalloutType::Caution,
                             }),
                         }),
                         slots: jarkup_rs::CalloutSlots {
@@ -275,21 +266,21 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::ChildDatabase { child_database: _ } => {
+                Block::ChildDatabase { child_database: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("ChildDatabase"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::ChildPage { child_page: _ } => {
+                Block::ChildPage { child_page: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("ChildPage"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::Code { code } => {
+                Block::Code { code } => {
                     let component: jarkup_rs::Component = match code.language {
                         Language::Mermaid => jarkup_rs::Mermaid {
                             id: Some(block.id),
@@ -330,7 +321,7 @@ impl Client {
 
                     components.push(component);
                 }
-                notionrs_types::object::block::Block::ColumnList { .. } => {
+                Block::ColumnList { .. } => {
                     let columns = children_cache.remove(&block.id).unwrap_or_default();
 
                     let component = jarkup_rs::ColumnList {
@@ -341,7 +332,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Column { column } => {
+                Block::Column { column } => {
                     let column_children = children_cache.remove(&block.id).unwrap_or_default();
 
                     let component = jarkup_rs::Column {
@@ -356,7 +347,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Divider { divider: _ } => {
+                Block::Divider { divider: _ } => {
                     let component = jarkup_rs::Divider {
                         id: Some(block.id),
                         props: None,
@@ -365,14 +356,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Embed { embed: _ } => {
+                Block::Embed { embed: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Embed"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::Equation { equation } => {
+                Block::Equation { equation } => {
                     let component = jarkup_rs::Katex {
                         id: Some(block.id),
                         props: jarkup_rs::KatexProps {
@@ -383,18 +374,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::File { file } => {
+                Block::File { file } => {
                     let component = jarkup_rs::File {
                         id: Some(block.id),
                         props: jarkup_rs::FileProps {
                             src: file.get_url(),
                             name: match file {
-                                notionrs_types::object::file::File::External(external_file) => {
-                                    external_file.name
-                                }
-                                notionrs_types::object::file::File::NotionHosted(
-                                    notion_hosted_file,
-                                ) => notion_hosted_file.name,
+                                File::External(external_file) => external_file.name,
+                                File::NotionHosted(notion_hosted_file) => notion_hosted_file.name,
                                 _ => Some(String::from("untitled")),
                             },
                         },
@@ -403,7 +390,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Heading1 { heading_1 } => {
+                Block::Heading1 { heading_1 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
                         .convert_heading_block(
@@ -420,7 +407,7 @@ impl Client {
                         continue;
                     };
                 }
-                notionrs_types::object::block::Block::Heading2 { heading_2 } => {
+                Block::Heading2 { heading_2 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
                         .convert_heading_block(
@@ -437,7 +424,7 @@ impl Client {
                         continue;
                     };
                 }
-                notionrs_types::object::block::Block::Heading3 { heading_3 } => {
+                Block::Heading3 { heading_3 } => {
                     let children = children_cache.remove(&block.id).unwrap_or_default();
                     let component = self
                         .convert_heading_block(
@@ -454,18 +441,31 @@ impl Client {
                         continue;
                     };
                 }
-                notionrs_types::object::block::Block::Image { image } => {
+                Block::Heading4 { heading_4 } => {
+                    let children = children_cache.remove(&block.id).unwrap_or_default();
+                    let component = self
+                        .convert_heading_block(
+                            heading_4,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H4,
+                            children,
+                        )
+                        .await?;
+
+                    if let Some(c) = component {
+                        components.push(c);
+                    } else {
+                        continue;
+                    };
+                }
+                Block::Image { image } => {
                     let maybe_caption = match image.clone() {
-                        notionrs_types::object::file::File::External(external_file) => {
-                            external_file
-                                .caption
-                                .map(|c| c.into_iter().map(|c| c.to_string()).collect::<String>())
-                        }
-                        notionrs_types::object::file::File::NotionHosted(notion_hosted_file) => {
-                            notion_hosted_file
-                                .caption
-                                .map(|c| c.into_iter().map(|c| c.to_string()).collect::<String>())
-                        }
+                        File::External(external_file) => external_file
+                            .caption
+                            .map(|c| c.into_iter().map(|c| c.to_string()).collect::<String>()),
+                        File::NotionHosted(notion_hosted_file) => notion_hosted_file
+                            .caption
+                            .map(|c| c.into_iter().map(|c| c.to_string()).collect::<String>()),
                         _ => Some(String::from("untitled")),
                     };
 
@@ -507,14 +507,14 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::LinkPreview { link_preview: _ } => {
+                Block::LinkPreview { link_preview: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("LinkPreview"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::NumberedListItem { numbered_list_item } => {
+                Block::NumberedListItem { numbered_list_item } => {
                     let inline_components: Vec<jarkup_rs::Component> = self
                         .convert_rich_text(numbered_list_item.rich_text)
                         .await?
@@ -582,7 +582,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Paragraph { paragraph } => {
+                Block::Paragraph { paragraph } => {
                     let component = jarkup_rs::Paragraph {
                         id: Some(block.id.clone()),
                         props: Some(jarkup_rs::ParagraphProps {
@@ -612,8 +612,8 @@ impl Client {
                         components.push(component.into());
                     };
                 }
-                notionrs_types::object::block::Block::Pdf { pdf: _ } => {}
-                notionrs_types::object::block::Block::Quote { quote } => {
+                Block::Pdf { pdf: _ } => {}
+                Block::Quote { quote } => {
                     let maybe_paragraph_component: Option<jarkup_rs::Component> =
                         if quote.rich_text.len() > 0 {
                             let paragraph = jarkup_rs::Paragraph {
@@ -647,18 +647,18 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::SyncedBlock { synced_block: _ } => {
+                Block::SyncedBlock { synced_block: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("SyncedBlock"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::TableOfContents {
+                Block::TableOfContents {
                     table_of_contents: _,
                 } => continue,
 
-                notionrs_types::object::block::Block::Tab { .. } => {
+                Block::Tab { .. } => {
                     let maybe_paragraph_blocks =
                         children_cache.remove(&block.id).unwrap_or_default();
 
@@ -687,7 +687,7 @@ impl Client {
                     components.push(tabs_component.into());
                 }
 
-                notionrs_types::object::block::Block::Table { table } => {
+                Block::Table { table } => {
                     let mut all_children_rows =
                         children_cache.remove(&block.id).unwrap_or_default();
 
@@ -753,7 +753,7 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::TableRow { table_row } => {
+                Block::TableRow { table_row } => {
                     let mut cell_components: Vec<jarkup_rs::Component> = Vec::new();
 
                     for cell in table_row.cells {
@@ -780,21 +780,21 @@ impl Client {
 
                     components.push(row_component.into());
                 }
-                notionrs_types::object::block::Block::Template { template: _ } => {
+                Block::Template { template: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Template"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::ToDo { to_do: _ } => {
+                Block::ToDo { to_do: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("ToDo"));
                     } else {
                         continue;
                     }
                 }
-                notionrs_types::object::block::Block::Toggle { toggle } => {
+                Block::Toggle { toggle } => {
                     let children_components = children_cache.remove(&block.id).unwrap_or_default();
 
                     let summary_components = self.convert_rich_text(toggle.rich_text).await?;
@@ -810,7 +810,8 @@ impl Client {
 
                     components.push(component.into());
                 }
-                notionrs_types::object::block::Block::Video { video: _ } => {
+
+                Block::Video { video: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Video"));
                     } else {
@@ -818,7 +819,7 @@ impl Client {
                     }
                 }
 
-                notionrs_types::object::block::Block::Unsupported { unsupported } => {
+                Block::Unsupported { unsupported } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component(&format!(
                             "UnsupportedBlock: {}",
@@ -829,9 +830,18 @@ impl Client {
                     }
                 }
 
-                _ => {
+                Block::MeetingNotes { meeting_notes: _ } => {
                     if self.enable_unsupported_block {
-                        components.push(self.create_unsupported_component("Unknown"));
+                        components.push(self.create_unsupported_component("MeetingNotes"));
+                    } else {
+                        continue;
+                    }
+                }
+
+                #[allow(deprecated)]
+                Block::Transcription { transcription: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Transcription"));
                     } else {
                         continue;
                     }
