@@ -441,6 +441,23 @@ impl Client {
                         continue;
                     };
                 }
+                Block::Heading4 { heading_4 } => {
+                    let children = children_cache.remove(&block.id).unwrap_or_default();
+                    let component = self
+                        .convert_heading_block(
+                            heading_4,
+                            &block.id,
+                            jarkup_rs::HeadingLevel::H4,
+                            children,
+                        )
+                        .await?;
+
+                    if let Some(c) = component {
+                        components.push(c);
+                    } else {
+                        continue;
+                    };
+                }
                 Block::Image { image } => {
                     let maybe_caption = match image.clone() {
                         File::External(external_file) => external_file
@@ -793,6 +810,7 @@ impl Client {
 
                     components.push(component.into());
                 }
+
                 Block::Video { video: _ } => {
                     if self.enable_unsupported_block {
                         components.push(self.create_unsupported_component("Video"));
@@ -812,9 +830,18 @@ impl Client {
                     }
                 }
 
-                _ => {
+                Block::MeetingNotes { meeting_notes: _ } => {
                     if self.enable_unsupported_block {
-                        components.push(self.create_unsupported_component("Unknown"));
+                        components.push(self.create_unsupported_component("MeetingNotes"));
+                    } else {
+                        continue;
+                    }
+                }
+
+                #[allow(deprecated)]
+                Block::Transcription { transcription: _ } => {
+                    if self.enable_unsupported_block {
+                        components.push(self.create_unsupported_component("Transcription"));
                     } else {
                         continue;
                     }
