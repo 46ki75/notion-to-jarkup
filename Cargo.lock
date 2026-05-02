@@ -1314,7 +1314,7 @@ checksum = "0676bb32a98c1a483ce53e500a81ad9c3d5b3f7c920c28c24e9cb0980d0b5bc8"
 
 [[package]]
 name = "notion-to-jarkup"
-version = "0.26.0"
+version = "0.27.0"
 dependencies = [
  "dotenvy",
  "futures",
@@ -1332,9 +1332,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs"
-version = "0.23.0"
+version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc37417085c47699f0930807686718458ec25c05e4778bb5de914b3c3069e055"
+checksum = "e6ed56c6047cc38a38b9638bcec011622072e1d67cceb977b9a9b94f948ed2a0"
 dependencies = [
  "bytes",
  "futures",
@@ -1351,9 +1351,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs_macro"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b72a1968989b4e925e7e56e462301e73daa2e22cb5099a2cb9dc3bbbf670dc8e"
+checksum = "205915f5b0f7bd0cc887ca1c14be2b76f54b7e3cc3ed00cf6acec180b7238165"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1362,9 +1362,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs_types"
-version = "0.17.0"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d308a9e95fbcdffcdeed9e60b37ba19d79622bb74878efa57ec3a7392bb2b516"
+checksum = "34414cad2d504a8ae1acec1132f1d00203898a3acc00673f857c23ea63bb45f7"
 dependencies = [
  "notionrs_macro",
  "serde",
@@ -1696,9 +1696,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.44"
+version = "1.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21b2ebcf727b7760c461f091f9f0f539b77b8e87f2fd88131e7f1b433b3cece4"
+checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
 dependencies = [
  "proc-macro2",
 ]
@@ -2237,9 +2237,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "2.0.114"
+version = "2.0.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4d107df263a3013ef9b1879b0df87d706ff80f65a86ea879bd9c31f9b307c2a"
+checksum = "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
 dependencies = [
  "proc-macro2",
  "quote",
