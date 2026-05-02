@@ -1332,9 +1332,9 @@ dependencies = [
 
 [[package]]
 name = "notionrs"
-version = "0.22.0"
+version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc7daf69b455f481b03151fea532ae46d693295720a826c58e9145462bfd9949"
+checksum = "cc37417085c47699f0930807686718458ec25c05e4778bb5de914b3c3069e055"
 dependencies = [
  "bytes",
  "futures",
