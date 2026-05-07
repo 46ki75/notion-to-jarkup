@@ -470,24 +470,32 @@ impl Client {
                     };
 
                     let (width, height, mime_type) = if self.enable_fetch_image_meta {
-                        let image_bytes = self
+                        // Fetch only the first 32 bytes via an HTTP Range request.
+                        // Most image formats store their dimensions in the header,
+                        // so this avoids downloading the full file.
+                        // JPEG is the exception — SOF markers can appear later —
+                        // but 32 bytes is sufficient for PNG, GIF, WebP, and others.
+                        let bytes = self
                             .reqwest_client
                             .get(image.get_url())
                             .header("User-Agent", "notion-to-jarkup")
+                            .header(reqwest::header::RANGE, "bytes=0-31")
                             .send()
                             .await?
                             .bytes()
                             .await?;
 
-                        let mime_type = infer::get(&image_bytes).map(|t| t.to_string());
+                        // infer detects the MIME type from magic bytes in the header.
+                        let mime_type = infer::get(&bytes).map(|t| t.to_string());
 
-                        let info = image::ImageReader::new(std::io::Cursor::new(image_bytes))
-                            .with_guessed_format()
-                            .ok()
-                            .and_then(|reader| reader.into_dimensions().ok())
-                            .map_or((None, None), |(x, y)| (Some(x), Some(y)));
+                        // blob_size returns ImageError::IoError if the slice is too short,
+                        // in which case we fall back to None rather than propagating the error.
+                        let (width, height) = imagesize::blob_size(&bytes)
+                            .map_or((None, None), |dim| {
+                                (Some(dim.width as u32), Some(dim.height as u32))
+                            });
 
-                        (info.0, info.1, mime_type)
+                        (width, height, mime_type)
                     } else {
                         (None, None, None)
                     };
